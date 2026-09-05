@@ -1,0 +1,409 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+    
+    .chart-container {
+        background: rgba(31, 41, 55, 0.5);
+        backdrop-filter: blur(10px);
+    }
+    
+    .activity-item {
+        transition: all 0.3s ease;
+    }
+    
+    .activity-item:hover {
+        background: rgba(75, 85, 99, 0.3);
+        transform: translateX(4px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Quick Stats -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="stat-card rounded-xl p-6 card-hover">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-400 text-sm">Total Orders</p>
+                <p class="text-2xl font-bold text-white">{{ total_orders|default:0 }}</p>
+                <p class="text-green-400 text-sm">{{ pending_orders }} pending</p>
+            </div>
+            <div class="bg-blue-500 p-3 rounded-full">
+                <i class="fas fa-shopping-cart text-white"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="stat-card rounded-xl p-6 card-hover">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-400 text-sm">Revenue</p>
+                <p class="text-2xl font-bold text-white">Rp {{ monthly_revenue|floatformat:0|default:0 }}</p>
+                {% if last_month_revenue %}
+                    {% widthratio monthly_revenue last_month_revenue 100 as growth %}
+                    <p class="{% if growth > 100 %}text-green-400{% else %}text-red-400{% endif %} text-sm">
+                        {% if growth > 100 %}+{% endif %}{{ growth|add:"-100" }}% dari bulan lalu
+                    </p>
+                {% else %}
+                    <p class="text-gray-400 text-sm">Bulan pertama</p>
+                {% endif %}
+            </div>
+            <div class="bg-green-500 p-3 rounded-full">
+                <i class="fas fa-dollar-sign text-white"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="stat-card rounded-xl p-6 card-hover">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-400 text-sm">Active Templates</p>
+                <p class="text-2xl font-bold text-white">{{ total_templates|default:0 }}</p>
+                <p class="text-blue-400 text-sm">Template tersedia</p>
+            </div>
+            <div class="bg-purple-500 p-3 rounded-full">
+                <i class="fas fa-file-alt text-white"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="stat-card rounded-xl p-6 card-hover">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-400 text-sm">Users</p>
+                <p class="text-2xl font-bold text-white">{{ total_users|default:0 }}</p>
+                <p class="text-yellow-400 text-sm">Total pengguna</p>
+            </div>
+            <div class="bg-orange-500 p-3 rounded-full">
+                <i class="fas fa-users text-white"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="mb-8">
+    <h2 class="text-xl font-semibold text-white mb-4">Quick Actions</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <button onclick="openCreateOrderModal()" class="bg-gray-800 hover:bg-gray-700 p-4 rounded-lg text-center transition-all duration-200 card-hover border border-gray-700">
+            <i class="fas fa-plus text-blue-400 text-2xl mb-2"></i>
+            <p class="text-sm text-gray-300">New Order</p>
+        </button>
+        
+        <a href="{% url 'admin_panel:template_editor_integration' %}" class="bg-gray-800 hover:bg-gray-700 p-4 rounded-lg text-center transition-all duration-200 card-hover border border-gray-700 block">
+            <i class="fas fa-magic text-blue-400 text-2xl mb-2"></i>
+            <p class="text-sm text-gray-300">Template Editor</p>
+        </a>
+        
+        <button onclick="openTemplateModal()" class="bg-gray-800 hover:bg-gray-700 p-4 rounded-lg text-center transition-all duration-200 card-hover border border-gray-700">
+            <i class="fas fa-file-plus text-green-400 text-2xl mb-2"></i>
+            <p class="text-sm text-gray-300">Add Template</p>
+        </button>
+        
+        <button onclick="openPaymentModal()" class="bg-gray-800 hover:bg-gray-700 p-4 rounded-lg text-center transition-all duration-200 card-hover border border-gray-700">
+            <i class="fas fa-credit-card text-yellow-400 text-2xl mb-2"></i>
+            <p class="text-sm text-gray-300">Process Payment</p>
+        </button>
+        
+        <button onclick="openUserModal()" class="bg-gray-800 hover:bg-gray-700 p-4 rounded-lg text-center transition-all duration-200 card-hover border border-gray-700">
+            <i class="fas fa-user-plus text-purple-400 text-2xl mb-2"></i>
+            <p class="text-sm text-gray-300">Add User</p>
+        </button>
+        
+        <button onclick="openSettingsModal()" class="bg-gray-800 hover:bg-gray-700 p-4 rounded-lg text-center transition-all duration-200 card-hover border border-gray-700">
+            <i class="fas fa-cog text-gray-400 text-2xl mb-2"></i>
+            <p class="text-sm text-gray-300">Settings</p>
+        </button>
+        
+        <button onclick="openReportModal()" class="bg-gray-800 hover:bg-gray-700 p-4 rounded-lg text-center transition-all duration-200 card-hover border border-gray-700">
+            <i class="fas fa-chart-bar text-red-400 text-2xl mb-2"></i>
+            <p class="text-sm text-gray-300">Reports</p>
+        </button>
+    </div>
+</div>
+
+<!-- Charts and Recent Activity -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <!-- Revenue Chart -->
+    <div class="chart-container rounded-xl p-6 border border-gray-700">
+        <h3 class="text-lg font-semibold text-white mb-4">Revenue Overview</h3>
+        <div class="h-64 flex items-center justify-center">
+            <canvas id="revenueChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+    
+    <!-- Recent Activity -->
+    <div class="chart-container rounded-xl p-6 border border-gray-700">
+        <h3 class="text-lg font-semibold text-white mb-4">Recent Activity</h3>
+        <div class="space-y-4 max-h-64 overflow-y-auto">
+            {% for activity in recent_activities %}
+            <div class="activity-item p-3 rounded-lg">
+                <div class="flex items-center space-x-3">
+                    <div class="w-2 h-2 
+                        {% if activity.action == 'create' %}bg-green-500
+                        {% elif activity.action == 'update' %}bg-blue-500
+                        {% elif activity.action == 'delete' %}bg-red-500
+                        {% elif activity.action == 'login' %}bg-purple-500
+                        {% else %}bg-yellow-500{% endif %} rounded-full"></div>
+                    <div class="flex-1">
+                        <p class="text-sm text-white">{{ activity.description|default:activity.action|capfirst }} {{ activity.model_name }} {{ activity.object_repr }}</p>
+                        <p class="text-xs text-gray-400">{{ activity.created_at|timesince }} ago</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center text-gray-400 py-4">
+                <p class="text-sm">Tidak ada aktivitas terbaru</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Recent Orders Table -->
+<div class="chart-container rounded-xl p-6 border border-gray-700">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-white">Recent Orders</h3>
+        <button onclick="openOrdersModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+            View All
+        </button>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="border-b border-gray-700">
+                    <th class="text-left py-3 px-4 text-gray-400">Order ID</th>
+                    <th class="text-left py-3 px-4 text-gray-400">Customer</th>
+                    <th class="text-left py-3 px-4 text-gray-400">Template</th>
+                    <th class="text-left py-3 px-4 text-gray-400">Amount</th>
+                    <th class="text-left py-3 px-4 text-gray-400">Status</th>
+                    <th class="text-left py-3 px-4 text-gray-400">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in recent_orders %}
+                <tr class="border-b border-gray-800 hover:bg-gray-800/50">
+                    <td class="py-3 px-4 text-white">#{{ order.id }}</td>
+                    <td class="py-3 px-4 text-white">{{ order.customer_name }}</td>
+                    <td class="py-3 px-4 text-white">{{ order.template.name|default:"No Template" }}</td>
+                    <td class="py-3 px-4 text-white">Rp {{ order.total_amount|floatformat:0 }}</td>
+                    <td class="py-3 px-4">
+                        <span class="{% if order.status == 'paid' %}bg-green-900 text-green-300{% elif order.status == 'pending' %}bg-yellow-900 text-yellow-300{% elif order.status == 'failed' %}bg-red-900 text-red-300{% else %}bg-gray-900 text-gray-300{% endif %} px-2 py-1 rounded-full text-xs">{{ order.get_status_display|capfirst }}</span>
+                    </td>
+                    <td class="py-3 px-4">
+                        <button onclick="viewOrder('{{ order.id }}')" class="text-blue-400 hover:text-blue-300 mr-2">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button onclick="editOrder('{{ order.id }}')" class="text-yellow-400 hover:text-yellow-300">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="py-3 px-4 text-center text-gray-400">
+                        <p class="text-sm">Tidak ada pesanan terbaru</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create Order Modal -->
+<div id="createOrderModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 modal-backdrop">
+    <div class="glass-effect rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-semibold text-white">Create New Order</h3>
+            <button onclick="closeCreateOrderModal()" class="text-gray-400 hover:text-white">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <form id="createOrderForm" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Customer Name</label>
+                    <input type="text" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 text-white" placeholder="Enter customer name">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                    <input type="email" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 text-white" placeholder="Enter email">
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Phone</label>
+                    <input type="tel" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 text-white" placeholder="Enter phone number">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Template</label>
+                    <select class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 text-white">
+                        <option>Select Template</option>
+                        <option>Elegant Rose</option>
+                        <option>Modern Gold</option>
+                        <option>Classic Blue</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Wedding Date</label>
+                <input type="date" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 text-white">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Special Notes</label>
+                <textarea rows="3" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 text-white" placeholder="Any special requirements..."></textarea>
+            </div>
+            
+            <div class="flex justify-end space-x-3 pt-4">
+                <button type="button" onclick="closeCreateOrderModal()" class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
+                    Create Order
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Template Modal -->
+<div id="templateModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 modal-backdrop">
+    <div class="glass-effect rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-semibold text-white">Add New Template</h3>
+            <button onclick="closeTemplateModal()" class="text-gray-400 hover:text-white">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <form id="templateForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Template Name</label>
+                <input type="text" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 text-white" placeholder="Enter template name">
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Category</label>
+                    <select class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 text-white">
+                        <option>Select Category</option>
+                        <option>Elegant</option>
+                        <option>Modern</option>
+                        <option>Classic</option>
+                        <option>Minimalist</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Price</label>
+                    <input type="number" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 text-white" placeholder="Enter price">
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                <textarea rows="3" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 text-white" placeholder="Template description..."></textarea>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Template File</label>
+                <input type="file" accept=".html,.zip" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 text-white">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Preview Image</label>
+                <input type="file" accept="image/*" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 text-white">
+            </div>
+            
+            <div class="flex justify-end space-x-3 pt-4">
+                <button type="button" onclick="closeTemplateModal()" class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
+                    Add Template
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Payment Modal -->
+<div id="paymentModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 modal-backdrop">
+    <div class="glass-effect rounded-2xl p-6 w-full max-w-lg">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-semibold text-white">Process Payment</h3>
+            <button onclick="closePaymentModal()" class="text-gray-400 hover:text-white">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <form id="paymentForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Order ID</label>
+                <input type="text" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 text-white" placeholder="Enter order ID">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Payment Method</label>
+                <select class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 text-white">
+                    <option>Select Payment Method</option>
+                    <option>Bank Transfer</option>
+                    <option>Credit Card</option>
+                    <option>E-Wallet</option>
+                    <option>Cash</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Amount</label>
+                <input type="number" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 text-white" placeholder="Enter amount">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Transaction ID</label>
+                <input type="text" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 text-white" placeholder="Enter transaction ID">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Notes</label>
+                <textarea rows="2" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 text-white" placeholder="Payment notes..."></textarea>
+            </div>
+            
+            <div class="flex justify-end space-x-3 pt-4">
+                <button type="button" onclick="closePaymentModal()" class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+                    Process Payment
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Pass Django data to JavaScript
+    window.chartData = {
+        labels: {{ chart_labels|safe }},
+        data: {{ chart_data|safe }}
+    };
+</script>
+<script src="{% static 'admin_panel/js/dashboard.js' %}"></script>
+{% endblock %}

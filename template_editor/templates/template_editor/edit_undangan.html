@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Undangan Pernikahan</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .font-dancing { font-family: 'Dancing Script', cursive; }
+        .font-great-vibes { font-family: 'Great Vibes', cursive; }
+        .font-poppins { font-family: 'Poppins', sans-serif; }
+        
+        .bg-gradient-wedding {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+        
+        .bg-gradient-gold {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        }
+        
+        .card-shadow {
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .form-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        
+        .preview-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="font-poppins bg-gradient-wedding min-h-screen">
+    
+    <!-- Header -->
+    <header class="bg-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="javascript:history.back()" class="text-gray-600 hover:text-gray-800 transition-colors">
+                        <i class="fas fa-arrow-left text-xl"></i>
+                    </a>
+                    <h1 class="font-great-vibes text-3xl text-gray-800">
+                        Edit Undangan Pernikahan
+                    </h1>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'template_editor:undangan_detail' undangan.slug %}" target="_blank" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                        <i class="fas fa-eye mr-2"></i>Preview
+                    </a>
+                    
+                    <button type="submit" form="undanganForm" class="bg-gradient-gold text-white px-6 py-2 rounded-lg hover:opacity-90 transition-opacity">
+                        <i class="fas fa-save mr-2"></i>
+                        Update Undangan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <form id="undanganForm" method="post" enctype="multipart/form-data" class="max-w-6xl mx-auto">
+            {% csrf_token %}
+            
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Form Sections -->
+                <div class="lg:col-span-2 space-y-8">
+                    
+                    <!-- Basic Information -->
+                    <div class="form-section rounded-2xl p-8 card-shadow">
+                        <div class="flex items-center mb-6">
+                            <div class="bg-pink-100 w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-heart text-pink-600 text-xl"></i>
+                            </div>
+                            <h2 class="font-dancing text-2xl text-gray-800">Informasi Dasar</h2>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nama Mempelai Wanita *</label>
+                                <input type="text" name="bride_name" value="{{ undangan.bride_name|default:'' }}" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Nama lengkap mempelai wanita">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nama Mempelai Pria *</label>
+                                <input type="text" name="groom_name" value="{{ undangan.groom_name|default:'' }}" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Nama lengkap mempelai pria">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Pernikahan *</label>
+                                <input type="date" name="wedding_date" value="{{ undangan.wedding_date|date:'Y-m-d'|default:'' }}" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Slug URL *</label>
+                                <input type="text" name="slug" value="{{ undangan.slug|default:'' }}" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="url-undangan-anda" pattern="[a-z0-9-]+">
+                                <p class="text-sm text-gray-500 mt-1">URL undangan: /undangan/<span id="slugPreview">{{ undangan.slug|default:'url-undangan-anda' }}</span>/</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Cerita Cinta</label>
+                            <textarea name="story_text" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Ceritakan bagaimana kalian bertemu dan jatuh cinta...">{{ undangan.story_text|default:'' }}</textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Bride Information -->
+                    <div class="form-section rounded-2xl p-8 card-shadow">
+                        <div class="flex items-center mb-6">
+                            <div class="bg-pink-100 w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-female text-pink-600 text-xl"></i>
+                            </div>
+                            <h2 class="font-dancing text-2xl text-gray-800">Data Mempelai Wanita</h2>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nama Ayah</label>
+                                <input type="text" name="bride_father" value="{{ undangan.bride_father|default:'' }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Nama ayah mempelai wanita">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nama Ibu</label>
+                                <input type="text" name="bride_mother" value="{{ undangan.bride_mother|default:'' }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Nama ibu mempelai wanita">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Instagram</label>
+                                <input type="text" name="bride_instagram" value="{{ undangan.bride_instagram|default:'' }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="username (tanpa @)">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Foto Mempelai Wanita</label>
+                                <input type="file" name="bride_photo" accept="image/*" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                {% if undangan.bride_photo %}
+                                <div class="mt-2">
+                                    <img src="{{ undangan.bride_photo.url }}" alt="Bride Photo" class="w-20 h-20 object-cover rounded-lg">
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Groom Information -->
+                    <div class="form-section rounded-2xl p-8 card-shadow">
+                        <div class="flex items-center mb-6">
+                            <div class="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-male text-blue-600 text-xl"></i>
+                            </div>
+                            <h2 class="font-dancing text-2xl text-gray-800">Data Mempelai Pria</h2>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nama Ayah</label>
+                                <input type="text" name="groom_father" value="{{ undangan.groom_father|default:'' }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Nama ayah mempelai pria">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nama Ibu</label>
+                                <input type="text" name="groom_mother" value="{{ undangan.groom_mother|default:'' }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Nama ibu mempelai pria">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Instagram</label>
+                                <input type="text" name="groom_instagram" value="{{ undangan.groom_instagram|default:'' }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="username (tanpa @)">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Foto Mempelai Pria</label>
+                                <input type="file" name="groom_photo" accept="image/*" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                {% if undangan.groom_photo %}
+                                <div class="mt-2">
+                                    <img src="{{ undangan.groom_photo.url }}" alt="Groom Photo" class="w-20 h-20 object-cover rounded-lg">
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Foto Bersama</label>
+                            <input type="file" name="couple_photo" accept="image/*" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                            {% if undangan.couple_photo %}
+                            <div class="mt-2">
+                                <img src="{{ undangan.couple_photo.url }}" alt="Couple Photo" class="w-32 h-24 object-cover rounded-lg">
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Event Details -->
+                    <div class="form-section rounded-2xl p-8 card-shadow">
+                        <div class="flex items-center mb-6">
+                            <div class="bg-orange-100 w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-calendar text-orange-600 text-xl"></i>
+                            </div>
+                            <h2 class="font-dancing text-2xl text-gray-800">Detail Acara</h2>
+                        </div>
+                        
+                        <!-- Akad Nikah -->
+                        <div class="mb-8">
+                            <h3 class="font-semibold text-lg text-gray-800 mb-4 flex items-center">
+                                <i class="fas fa-ring text-pink-500 mr-2"></i>
+                                Akad Nikah
+                            </h3>
+                            
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Akad</label>
+                                    <input type="date" name="akad_date" value="{{ undangan.akad_date|date:'Y-m-d'|default:'' }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Waktu Akad</label>
+                                    <input type="time" name="akad_time" value="{{ undangan.akad_time|time:'H:i'|default:'' }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tempat Akad</label>
+                                    <input type="text" name="akad_venue" value="{{ undangan.akad_venue|default:'' }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Nama tempat akad">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Link Google Maps</label>
+                                    <input type="url" name="akad_maps_url" value="{{ undangan.akad_maps_url|default:'' }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="https://maps.google.com/...">
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Alamat Lengkap Akad</label>
+                                <textarea name="akad_address" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Alamat lengkap tempat akad nikah">{{ undangan.akad_address|default:'' }}</textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Resepsi -->
+                        <div>
+                            <h3 class="font-semibold text-lg text-gray-800 mb-4 flex items-center">
+                                <i class="fas fa-glass-cheers text-orange-500 mr-2"></i>
+                                Resepsi
+                            </h3>
+                            
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Resepsi</label>
+                                    <input type="date" name="reception_date" value="{{ undangan.reception_date|date:'Y-m-d'|default:'' }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Waktu Resepsi</label>
+                                    <input type="time" name="reception_time" value="{{ undangan.reception_time|time:'H:i'|default:'' }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tempat Resepsi</label>
+                                    <input type="text" name="reception_venue" value="{{ undangan.reception_venue|default:'' }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Nama tempat resepsi">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Link Google Maps</label>
+                                    <input type="url" name="reception_maps_url" value="{{ undangan.reception_maps_url|default:'' }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="https://maps.google.com/...">
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Alamat Lengkap Resepsi</label>
+                                <textarea name="reception_address" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Alamat lengkap tempat resepsi">{{ undangan.reception_address|default:'' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <!-- Preview Card -->
+                <div class="lg:col-span-1">
+                    <div class="sticky top-8">
+                        <div class="preview-card rounded-2xl p-6 text-white card-shadow">
+                            <div class="text-center mb-6">
+                                <i class="fas fa-eye text-3xl mb-4"></i>
+                                <h3 class="font-dancing text-2xl">Preview Undangan</h3>
+                            </div>
+                            
+                            <div class="bg-white bg-opacity-20 rounded-lg p-4 mb-4">
+                                <h4 class="font-great-vibes text-2xl text-center mb-2" id="previewBrideName">
+                                    {{ undangan.bride_name|default:'Nama Mempelai Wanita' }}
+                                </h4>
+                                <div class="text-center text-lg font-dancing mb-2">&</div>
+                                <h4 class="font-great-vibes text-2xl text-center mb-4" id="previewGroomName">
+                                    {{ undangan.groom_name|default:'Nama Mempelai Pria' }}
+                                </h4>
+                                
+                                <div class="text-center text-sm space-y-1">
+                                    <p id="previewWeddingDate">
+                                        {% if undangan.wedding_date %}
+                                            {{ undangan.wedding_date|date:"d F Y" }}
+                                        {% else %}
+                                            Tanggal Pernikahan
+                                        {% endif %}
+                                    </p>
+                                    <p id="previewVenue">
+                                        {{ undangan.reception_venue|default:'Tempat Resepsi' }}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center space-y-3">
+                                <a href="{% url 'template_editor:undangan_detail' undangan.slug %}" target="_blank" class="block bg-white text-purple-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                    <i class="fas fa-external-link-alt mr-2"></i>
+                                    Lihat Full Preview
+                                </a>
+                                
+                                <div class="text-xs opacity-75">
+                                    <p>URL Undangan:</p>
+                                    <p class="font-mono break-all">/undangan/<span id="previewSlug">{{ undangan.slug|default:'url-undangan' }}</span>/</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Tips -->
+                        <div class="mt-6 bg-white rounded-2xl p-6 card-shadow">
+                            <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                                <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                                Tips
+                            </h3>
+                            
+                            <ul class="text-sm text-gray-600 space-y-2">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mr-2 mt-1 text-xs"></i>
+                                    Gunakan foto berkualitas tinggi untuk hasil terbaik
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mr-2 mt-1 text-xs"></i>
+                                    Slug URL hanya boleh menggunakan huruf kecil, angka, dan tanda hubung
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mr-2 mt-1 text-xs"></i>
+                                    Pastikan tanggal dan waktu sudah benar
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mr-2 mt-1 text-xs"></i>
+                                    Link Google Maps membantu tamu menemukan lokasi
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </main>
+    
+    <!-- Scripts -->
+    <script>
+        // Real-time preview updates
+        function updatePreview() {
+            const brideName = document.querySelector('input[name="bride_name"]').value || 'Nama Mempelai Wanita';
+            const groomName = document.querySelector('input[name="groom_name"]').value || 'Nama Mempelai Pria';
+            const weddingDate = document.querySelector('input[name="wedding_date"]').value;
+            const receptionVenue = document.querySelector('input[name="reception_venue"]').value || 'Tempat Resepsi';
+            const slug = document.querySelector('input[name="slug"]').value || 'url-undangan';
+            
+            document.getElementById('previewBrideName').textContent = brideName;
+            document.getElementById('previewGroomName').textContent = groomName;
+            document.getElementById('previewVenue').textContent = receptionVenue;
+            document.getElementById('previewSlug').textContent = slug;
+            document.getElementById('slugPreview').textContent = slug;
+            
+            if (weddingDate) {
+                const date = new Date(weddingDate);
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                document.getElementById('previewWeddingDate').textContent = date.toLocaleDateString('id-ID', options);
+            } else {
+                document.getElementById('previewWeddingDate').textContent = 'Tanggal Pernikahan';
+            }
+        }
+        
+        // Add event listeners for real-time updates
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = ['bride_name', 'groom_name', 'wedding_date', 'reception_venue', 'slug'];
+            
+            inputs.forEach(inputName => {
+                const input = document.querySelector(`input[name="${inputName}"]`);
+                if (input) {
+                    input.addEventListener('input', updatePreview);
+                }
+            });
+            
+            // Validate slug format
+            const slugInput = document.querySelector('input[name="slug"]');
+            slugInput.addEventListener('input', function() {
+                this.value = this.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+                updatePreview();
+            });
+            
+            // Initial preview update
+            updatePreview();
+        });
+        
+        // Form validation
+        document.getElementById('undanganForm').addEventListener('submit', function(e) {
+            const requiredFields = ['bride_name', 'groom_name', 'wedding_date', 'slug'];
+            let isValid = true;
+            
+            requiredFields.forEach(fieldName => {
+                const field = document.querySelector(`input[name="${fieldName}"]`);
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('border-red-500');
+                    field.focus();
+                } else {
+                    field.classList.remove('border-red-500');
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('Mohon lengkapi semua field yang wajib diisi (*).'); 
+            }
+        });
+        
+        // File upload preview
+        function setupFilePreview(inputName, previewId) {
+            const input = document.querySelector(`input[name="${inputName}"]`);
+            if (input) {
+                input.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            let preview = document.getElementById(previewId);
+                            if (!preview) {
+                                preview = document.createElement('img');
+                                preview.id = previewId;
+                                preview.className = 'w-20 h-20 object-cover rounded-lg mt-2';
+                                input.parentNode.appendChild(preview);
+                            }
+                            preview.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+        }
+        
+        // Setup file previews
+        setupFilePreview('bride_photo', 'bridePhotoPreview');
+        setupFilePreview('groom_photo', 'groomPhotoPreview');
+        setupFilePreview('couple_photo', 'couplePhotoPreview');
+    </script>
+</body>
+</html>

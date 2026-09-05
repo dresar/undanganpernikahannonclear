@@ -1,0 +1,526 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Kelola Template{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Kelola Template</h1>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Kelola template undangan pernikahan</p>
+        </div>
+        <div class="mt-4 sm:mt-0 flex space-x-3">
+            <a href="{% url 'admin_panel:template_editor_integration' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                <i class="fas fa-magic mr-2"></i>Template Editor
+            </a>
+            <button onclick="openModal('importTemplateModal')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                <i class="fas fa-upload mr-2"></i>Import Template
+            </button>
+            <button onclick="openModal('createTemplateModal')" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors">
+                <i class="fas fa-plus mr-2"></i>Template Baru
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-900">
+                    <i class="fas fa-file-alt text-blue-600 dark:text-blue-400"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Template</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_templates|default:0 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-green-100 dark:bg-green-900">
+                    <i class="fas fa-eye text-green-600 dark:text-green-400"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Template Aktif</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ active_templates|default:0 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900">
+                    <i class="fas fa-star text-yellow-600 dark:text-yellow-400"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Template Premium</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ premium_templates|default:0 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-purple-100 dark:bg-purple-900">
+                    <i class="fas fa-download text-purple-600 dark:text-purple-400"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Download</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_downloads|default:0 }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cari Template</label>
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Nama template..." 
+                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Kategori</label>
+                <select name="category" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    <option value="">Semua Kategori</option>
+                    {% for category in categories %}
+                        <option value="{{ category.slug }}" {% if category_filter == category.slug %}selected{% endif %}>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+                <select name="status" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    <option value="">Semua Status</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Aktif</option>
+                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Tidak Aktif</option>
+                </select>
+            </div>
+            <div class="flex items-end">
+                <button type="submit" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors mr-2">
+                    <i class="fas fa-search mr-2"></i>Filter
+                </button>
+                <a href="{% url 'admin_panel:templates_list' %}" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-times"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Templates Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {% for template in page_obj %}
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow">
+            <!-- Template Preview -->
+            <div class="relative">
+                {% if template.preview_image %}
+                    <img src="{{ template.preview_image.url }}" alt="{{ template.name }}" class="w-full h-48 object-cover">
+                {% else %}
+                    <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                        <i class="fas fa-image text-4xl text-gray-400"></i>
+                    </div>
+                {% endif %}
+                
+                <!-- Status Badge -->
+                <div class="absolute top-2 right-2">
+                    <span class="px-2 py-1 text-xs rounded-full
+                               {% if template.is_active %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                               {% else %}bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                               {% endif %}">
+                        {% if template.is_active %}Aktif{% else %}Tidak Aktif{% endif %}
+                    </span>
+                </div>
+                
+                <!-- Premium Badge -->
+                {% if template.is_premium %}
+                <div class="absolute top-2 left-2">
+                    <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                        <i class="fas fa-crown mr-1"></i>Premium
+                    </span>
+                </div>
+                {% endif %}
+                
+                <!-- Quick Actions -->
+                <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
+                    <button onclick="previewTemplate({{ template.id }})" class="bg-white text-gray-800 px-3 py-1 rounded-lg text-sm hover:bg-gray-100">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <a href="{% url 'admin_panel:edit_template' template.id %}" class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-blue-700">
+                        <i class="fas fa-magic"></i>
+                    </a>
+                    <button onclick="editTemplate({{ template.id }})" class="bg-primary-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-primary-700">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="duplicateTemplate({{ template.id }})" class="bg-green-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-green-700">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Template Info -->
+            <div class="p-4">
+                <div class="flex items-start justify-between mb-2">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white truncate">{{ template.name }}</h3>
+                    <div class="flex items-center space-x-1">
+                        <button onclick="toggleTemplateStatus({{ template.id }})" 
+                                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            <i class="fas fa-power-off"></i>
+                        </button>
+                        <div class="relative">
+                            <button onclick="toggleDropdown('template-{{ template.id }}-menu')" 
+                                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <div id="template-{{ template.id }}-menu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md shadow-lg z-10">
+                                <div class="py-1">
+                                    <a href="{% url 'admin_panel:template_editor_integration' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                        <i class="fas fa-magic mr-2"></i>Gunakan di Template Editor
+                                    </a>
+                                    <div class="border-t border-gray-100 dark:border-gray-600"></div>
+                                    <a href="#" onclick="editTemplate({{ template.id }})" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                        <i class="fas fa-edit mr-2"></i>Edit
+                                    </a>
+                                    <a href="#" onclick="duplicateTemplate({{ template.id }})" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                        <i class="fas fa-copy mr-2"></i>Duplikat
+                                    </a>
+                                    <a href="#" onclick="exportTemplate({{ template.id }})" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                        <i class="fas fa-download mr-2"></i>Export
+                                    </a>
+                                    <div class="border-t border-gray-100 dark:border-gray-600"></div>
+                                    <a href="#" onclick="deleteTemplate({{ template.id }})" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                        <i class="fas fa-trash mr-2"></i>Hapus
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">{{ template.description|truncatechars:60 }}</p>
+                
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-lg font-bold text-primary-600 dark:text-primary-400">Rp {{ template.price|floatformat:0 }}</span>
+                    {% if template.category %}
+                        <span class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full">{{ template.category.name }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                    <span><i class="fas fa-download mr-1"></i>{{ template.order_count|default:0 }} pesanan</span>
+                    <span><i class="fas fa-star mr-1"></i>{{ template.rating|default:0 }}/5</span>
+                </div>
+                
+                {% if template.tags.exists %}
+                <div class="mt-2 flex flex-wrap gap-1">
+                    {% for tag in template.tags.all|slice:":3" %}
+                        <span class="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full">{{ tag.name }}</span>
+                    {% endfor %}
+                    {% if template.tags.count > 3 %}
+                        <span class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full">+{{ template.tags.count|add:"-3" }}</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full">
+            <div class="text-center py-12">
+                <i class="fas fa-file-alt text-4xl text-gray-400 mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Tidak ada template</h3>
+                <p class="text-gray-500 dark:text-gray-400 mb-4">Belum ada template yang dibuat. Mulai dengan membuat template pertama Anda.</p>
+                <button onclick="openModal('createTemplateModal')" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Buat Template Baru
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+        <div class="flex items-center justify-between">
+            <div class="flex-1 flex justify-between sm:hidden">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
+                       class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        Previous
+                    </a>
+                {% endif %}
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
+                       class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        Next
+                    </a>
+                {% endif %}
+            </div>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-gray-700 dark:text-gray-300">
+                        Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} results
+                    </p>
+                </div>
+                <div>
+                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
+                               class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-primary-50 text-sm font-medium text-primary-600">
+                                    {{ num }}
+                                </span>
+                            {% else %}
+                                <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
+                                   class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                    {{ num }}
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
+                               class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Create Template Modal -->
+<div id="createTemplateModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Buat Template Baru</h3>
+                    <button onclick="closeModal('createTemplateModal')" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="createTemplateForm" enctype="multipart/form-data">
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nama Template</label>
+                                <input type="text" name="name" required 
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Kategori</label>
+                                <select name="category" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                                    <option value="">Pilih Kategori</option>
+                                    {% for category in categories %}
+                                        <option value="{{ category.id }}">{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Deskripsi</label>
+                            <textarea name="description" rows="3" 
+                                      class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Harga</label>
+                                <input type="number" name="price" min="0" step="1000" required 
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Preview Image</label>
+                                <input type="file" name="preview_image" accept="image/*" 
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="is_premium" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Template Premium</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="is_active" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Aktif</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button type="button" onclick="closeModal('createTemplateModal')" 
+                                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                            Batal
+                        </button>
+                        <button type="submit" 
+                                class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+                            Buat Template
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import Template Modal -->
+<div id="importTemplateModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Import Template</h3>
+                    <button onclick="closeModal('importTemplateModal')" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="importTemplateForm" enctype="multipart/form-data">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">File Template</label>
+                            <input type="file" name="template_file" accept=".zip,.json" required 
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Format yang didukung: ZIP, JSON</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sumber Import</label>
+                            <select name="import_source" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                                <option value="file">File Lokal</option>
+                                <option value="template_editor">Template Editor</option>
+                                <option value="url">URL</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button type="button" onclick="closeModal('importTemplateModal')" 
+                                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                            Batal
+                        </button>
+                        <button type="submit" 
+                                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                            Import Template
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Template Preview Modal -->
+<div id="templatePreviewModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-y-auto">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Preview Template</h3>
+                    <button onclick="closeModal('templatePreviewModal')" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div id="templatePreviewContent" class="text-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+                    <p class="mt-2 text-gray-500 dark:text-gray-400">Loading preview...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function previewTemplate(templateId) {
+    openModal('templatePreviewModal');
+    // Load template preview
+    fetch(`/admin/templates/${templateId}/preview/`)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('templatePreviewContent').innerHTML = html;
+        })
+        .catch(error => {
+            document.getElementById('templatePreviewContent').innerHTML = 
+                '<p class="text-red-500">Error loading preview</p>';
+        });
+}
+
+function editTemplate(templateId) {
+    window.location.href = `/admin/templates/${templateId}/edit/`;
+}
+
+function duplicateTemplate(templateId) {
+    if (confirm('Apakah Anda yakin ingin menduplikat template ini?')) {
+        showNotification('Fitur duplikat template akan segera tersedia', 'info');
+    }
+}
+
+function exportTemplate(templateId) {
+    showNotification('Fitur export template akan segera tersedia', 'info');
+}
+
+function deleteTemplate(templateId) {
+    if (confirm('Apakah Anda yakin ingin menghapus template ini? Tindakan ini tidak dapat dibatalkan.')) {
+        showNotification('Fitur hapus template akan segera tersedia', 'info');
+    }
+}
+
+function toggleTemplateStatus(templateId) {
+    fetch(`/admin/templates/${templateId}/toggle-status/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Status template berhasil diubah', 'success');
+            location.reload();
+        } else {
+            showNotification('Gagal mengubah status template', 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Terjadi kesalahan', 'error');
+    });
+}
+
+function toggleDropdown(id) {
+    const dropdown = document.getElementById(id);
+    dropdown.classList.toggle('hidden');
+    
+    // Close other dropdowns
+    document.querySelectorAll('[id$="-menu"]').forEach(menu => {
+        if (menu.id !== id) {
+            menu.classList.add('hidden');
+        }
+    });
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('[onclick*="toggleDropdown"]')) {
+        document.querySelectorAll('[id$="-menu"]').forEach(menu => {
+            menu.classList.add('hidden');
+        });
+    }
+});
+
+document.getElementById('createTemplateForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    showNotification('Fitur buat template akan segera tersedia', 'info');
+    closeModal('createTemplateModal');
+});
+
+document.getElementById('importTemplateForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    showNotification('Fitur import template akan segera tersedia', 'info');
+    closeModal('importTemplateModal');
+});
+</script>
+{% endblock %}

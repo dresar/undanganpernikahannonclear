@@ -1,0 +1,190 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% block title %}Editor Integration{% endblock %}
+{% block page_title %}Template Editor Integration{% endblock %}
+
+{% block extra_css %}
+<style>
+    .integration-card {
+        background: rgba(31, 41, 55, 0.8);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(75, 85, 99, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .integration-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        border-color: rgba(59, 130, 246, 0.5);
+    }
+    
+    .feature-icon {
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Header Section -->
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-white mb-4">🎨 Template Editor Integration</h1>
+        <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+            Akses editor template yang powerful untuk membuat dan mengedit undangan digital dengan mudah
+        </p>
+    </div>
+    
+    <!-- Main Integration Card -->
+    <div class="integration-card rounded-2xl p-8 mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            <div>
+                <h2 class="text-3xl font-bold text-white mb-4">🚀 Editor Dashboard</h2>
+                <p class="text-gray-300 mb-6">
+                    Editor template yang lengkap dengan fitur drag & drop, live preview, AI generator, dan export ke berbagai format.
+                </p>
+                
+                <div class="space-y-3 mb-6">
+                    <div class="flex items-center text-gray-300">
+                        <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                        <span>Live Preview Real-time</span>
+                    </div>
+                    <div class="flex items-center text-gray-300">
+                        <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                        <span>AI Generator dengan Gemini</span>
+                    </div>
+                    <div class="flex items-center text-gray-300">
+                        <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                        <span>Export HTML, CSS, JS</span>
+                    </div>
+                    <div class="flex items-center text-gray-300">
+                        <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                        <span>Template Library</span>
+                    </div>
+                </div>
+                
+                <a href="{% url 'template_editor:editor_dashboard' %}" 
+                   class="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all transform hover:scale-105">
+                    <i class="fas fa-external-link-alt mr-3"></i>
+                    Buka Editor Dashboard
+                </a>
+            </div>
+            
+            <div class="text-center">
+                <div class="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl p-8 text-white">
+                    <i class="fas fa-code text-6xl mb-4"></i>
+                    <h3 class="text-2xl font-bold mb-2">Advanced Editor</h3>
+                    <p class="text-blue-100">
+                        Editor dengan CodeMirror, syntax highlighting, dan auto-completion
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Features Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="integration-card rounded-xl p-6 text-center">
+            <div class="feature-icon w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-palette text-2xl text-white"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-white mb-2">Color Palette</h3>
+            <p class="text-gray-400">
+                Pilihan warna yang beragam dengan color picker dan preset palette
+            </p>
+        </div>
+        
+        <div class="integration-card rounded-xl p-6 text-center">
+            <div class="feature-icon w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-font text-2xl text-white"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-white mb-2">Typography</h3>
+            <p class="text-gray-400">
+                Berbagai pilihan font family dan ukuran untuk desain yang sempurna
+            </p>
+        </div>
+        
+        <div class="integration-card rounded-xl p-6 text-center">
+            <div class="feature-icon w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-shapes text-2xl text-white"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-white mb-2">Design Elements</h3>
+            <p class="text-gray-400">
+                Tambahkan teks, gambar, bentuk, border, dan animasi dengan mudah
+            </p>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="integration-card rounded-xl p-6">
+        <h3 class="text-2xl font-bold text-white mb-6 text-center">⚡ Quick Actions</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <a href="{% url 'template_editor:editor_dashboard' %}" 
+               class="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-lg text-center transition-colors">
+                <i class="fas fa-plus-circle text-2xl mb-2 block"></i>
+                <span class="font-medium">Template Baru</span>
+            </a>
+            
+            <a href="{% url 'admin_panel:templates_list' %}" 
+               class="bg-green-600 hover:bg-green-700 text-white p-4 rounded-lg text-center transition-colors">
+                <i class="fas fa-list text-2xl mb-2 block"></i>
+                <span class="font-medium">Lihat Templates</span>
+            </a>
+            
+            <button onclick="openAIGenerator()" 
+                    class="bg-purple-600 hover:bg-purple-700 text-white p-4 rounded-lg text-center transition-colors">
+                <i class="fas fa-robot text-2xl mb-2 block"></i>
+                <span class="font-medium">AI Generator</span>
+            </button>
+            
+            <button onclick="showTutorial()" 
+                    class="bg-orange-600 hover:bg-orange-700 text-white p-4 rounded-lg text-center transition-colors">
+                <i class="fas fa-graduation-cap text-2xl mb-2 block"></i>
+                <span class="font-medium">Tutorial</span>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Info Section -->
+    <div class="mt-8 text-center">
+        <p class="text-gray-400">
+            <i class="fas fa-info-circle mr-2"></i>
+            Editor dashboard menggunakan teknologi terbaru untuk pengalaman editing yang optimal
+        </p>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+function openAIGenerator() {
+    // Redirect to editor with AI modal open
+    window.open('{% url "template_editor:editor_dashboard" %}?ai=true', '_blank');
+}
+
+function showTutorial() {
+    alert('Tutorial akan segera tersedia!');
+}
+
+// Add some interactive effects
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate cards on scroll
+    const cards = document.querySelectorAll('.integration-card');
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    });
+    
+    cards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(card);
+    });
+});
+</script>
+{% endblock %}

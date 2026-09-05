@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template Gallery - Wedding Invitation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .template-card {
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .template-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-4xl font-bold mb-2">Template Gallery</h1>
+                    <p class="text-xl opacity-90">Choose from our beautiful wedding invitation templates</p>
+                </div>
+                <div class="flex gap-3">
+                    <a href="javascript:history.back()" class="bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Kembali
+                    </a>
+                    <a href="{% url 'template_editor:editor_dashboard' %}" class="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Template Categories -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Categories</h2>
+            <div class="flex flex-wrap gap-4">
+                <button class="category-btn bg-purple-600 text-white px-6 py-2 rounded-full font-semibold" data-category="all">
+                    All Templates
+                </button>
+                {% for category in categories %}
+                <button class="category-btn bg-gray-200 text-gray-700 px-6 py-2 rounded-full font-semibold hover:bg-purple-100" data-category="{{ category.slug }}">
+                    {{ category.name }}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Templates Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for template in templates %}
+            <div class="template-card bg-white rounded-xl shadow-lg overflow-hidden" data-category="{{ template.category.slug }}">
+                <div class="h-64 bg-gradient-to-br from-purple-400 to-pink-400 relative overflow-hidden">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="text-white text-center">
+                            <i class="fas fa-heart text-6xl mb-4 opacity-80"></i>
+                            <h3 class="text-2xl font-bold">{{ template.name }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4">
+                        <span class="inline-block bg-purple-100 text-purple-800 text-sm px-3 py-1 rounded-full">
+                            {{ template.category.name }}
+                        </span>
+                    </div>
+                    <p class="text-gray-600 mb-4">{{ template.description|truncatewords:15 }}</p>
+                    <div class="flex gap-2">
+                        <a href="{% url 'template_editor:template_preview' template.pk %}" 
+                           class="flex-1 bg-purple-600 text-white text-center py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors">
+                            <i class="fas fa-eye mr-2"></i>Preview
+                        </a>
+                        <a href="{% url 'template_editor:create_invitation' template.pk %}" 
+                           class="flex-1 bg-green-600 text-white text-center py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">
+                            <i class="fas fa-plus mr-2"></i>Use Template
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-12">
+                <i class="fas fa-heart-broken text-6xl text-gray-300 mb-4"></i>
+                <h3 class="text-2xl font-bold text-gray-500 mb-2">No Templates Found</h3>
+                <p class="text-gray-400">No templates are available at the moment.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        // Category filtering
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const category = this.dataset.category;
+                
+                // Update active button
+                document.querySelectorAll('.category-btn').forEach(b => {
+                    b.classList.remove('bg-purple-600', 'text-white');
+                    b.classList.add('bg-gray-200', 'text-gray-700');
+                });
+                this.classList.remove('bg-gray-200', 'text-gray-700');
+                this.classList.add('bg-purple-600', 'text-white');
+                
+                // Filter templates
+                document.querySelectorAll('.template-card').forEach(card => {
+                    if (category === 'all' || card.dataset.category === category) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if undangan %}Edit{% else %}Buat{% endif %} Undangan Pernikahan</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .font-dancing { font-family: 'Dancing Script', cursive; }
+        .font-great-vibes { font-family: 'Great Vibes', cursive; }
+        .font-poppins { font-family: 'Poppins', sans-serif; }
+        
+        .bg-gradient-wedding {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+        
+        .bg-gradient-gold {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        }
+        
+        .card-shadow {
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .form-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        
+        .preview-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="font-poppins bg-gradient-wedding min-h-screen">
+    
+    <!-- Header -->
+    <header class="bg-white shadow-lg">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <a href="javascript:history.back()" class="text-gray-600 hover:text-gray-800 transition-colors">
+                        <i class="fas fa-arrow-left text-lg"></i>
+                    </a>
+                    <h1 class="font-great-vibes text-2xl text-gray-800">
+                        {% if undangan %}Edit{% else %}Buat{% endif %} Undangan Pernikahan
+                    </h1>
+                </div>
+                
+                <div class="flex items-center space-x-3">
+                    {% if undangan %}
+                    <a href="{% url 'template_editor:invitation_preview' undangan.slug %}" target="_blank" class="bg-blue-500 text-white px-3 py-1.5 rounded-lg hover:bg-blue-600 transition-colors text-sm">
+                        <i class="fas fa-eye mr-1"></i>Preview
+                    </a>
+                    {% else %}
+                    <button type="button" id="previewButton" class="bg-blue-500 text-white px-3 py-1.5 rounded-lg hover:bg-blue-600 transition-colors text-sm" onclick="openTemplatePreview()">
+                        <i class="fas fa-eye mr-1"></i>Preview
+                    </button>
+                    {% endif %}
+                    
+                    <button type="submit" form="undanganForm" class="bg-gradient-gold text-white px-4 py-1.5 rounded-lg hover:opacity-90 transition-opacity text-sm">
+                        <i class="fas fa-save mr-1"></i>
+                        {% if undangan %}Update{% else %}Simpan{% endif %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+        <!-- Error Messages -->
+        {% if messages %}
+        <div class="max-w-7xl mx-auto mb-4">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-lg mb-3 flex items-center">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                <span>{{ message }}</span>
+                <button type="button" class="ml-auto text-red-700 hover:text-red-900" onclick="this.parentElement.style.display='none'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <form id="undanganForm" method="post" enctype="multipart/form-data" class="max-w-7xl mx-auto">
+            {% csrf_token %}
+            
+            <div class="max-w-4xl mx-auto">
+                <!-- Form Sections -->
+                <div class="space-y-6">
+                    
+                    <!-- Template Selection -->
+                    <div class="form-section rounded-xl p-4 card-shadow">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-purple-100 w-8 h-8 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-palette text-purple-600 text-sm"></i>
+                            </div>
+                            <h2 class="font-dancing text-xl text-gray-800">Pilih Template</h2>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-3 lg:grid-cols-4 gap-3" id="templateSelection">
+                            {% for template in available_templates %}
+                            <div class="template-option border border-gray-200 rounded-lg p-3 cursor-pointer hover:border-pink-500 transition-colors" data-template-id="{{ template.id }}">
+                                <div class="aspect-video bg-gray-100 rounded-lg mb-2 overflow-hidden">
+                                    {% if template.preview_image %}
+                                        <img src="{{ template.preview_image.url }}" alt="{{ template.name }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-pink-100 to-purple-100">
+                                            <i class="fas fa-image text-gray-400 text-2xl"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <h3 class="font-medium text-xs text-center">{{ template.name }}</h3>
+                                {% if template.is_premium %}
+                                    <span class="inline-block mt-1 px-1 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded">
+                                        <i class="fas fa-crown mr-1"></i>Pro
+                                    </span>
+                                {% endif %}
+                            </div>
+                            {% empty %}
+                            <div class="template-option border border-gray-200 rounded-lg p-3 cursor-pointer hover:border-pink-500 transition-colors" data-template-id="">
+                                <div class="aspect-video bg-gradient-to-br from-pink-100 to-purple-100 rounded-lg mb-2 flex items-center justify-center">
+                                    <i class="fas fa-plus text-gray-400 text-xl"></i>
+                                </div>
+                                <h3 class="font-medium text-xs text-center">Default</h3>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <input type="hidden" name="selectedTemplateId" id="selectedTemplateId" value="{% if form_data.selectedTemplateId %}{{ form_data.selectedTemplateId }}{% elif undangan.template %}{{ undangan.template.id }}{% endif %}">
+                    </div>
+                    
+                    <!-- Basic Information -->
+                    <div class="form-section rounded-xl p-4 card-shadow">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-pink-100 w-8 h-8 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-heart text-pink-600 text-sm"></i>
+                            </div>
+                            <h2 class="font-dancing text-xl text-gray-800">Informasi Dasar</h2>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Judul Undangan *</label>
+                                <input type="text" name="judul" value="{% if form_data %}{{ form_data.judul }}{% else %}{{ undangan.judul|default:'' }}{% endif %}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Judul undangan">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Slug URL *</label>
+                                <input type="text" name="slug" value="{% if form_data %}{{ form_data.slug }}{% else %}{{ undangan.slug|default:'' }}{% endif %}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="url-undangan-anda" pattern="[a-z0-9-]+">
+                                <p class="text-xs text-gray-500 mt-1">/undangan/<span id="slugPreview">{% if form_data %}{{ form_data.slug }}{% else %}{{ undangan.slug|default:'url-undangan-anda' }}{% endif %}</span>/</p>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Panggilan Wanita *</label>
+                                <input type="text" name="nama_panggilan_wanita" value="{% if form_data %}{{ form_data.nama_panggilan_wanita }}{% else %}{{ undangan.nama_panggilan_wanita|default:'' }}{% endif %}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Nama panggilan">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Panggilan Pria *</label>
+                                <input type="text" name="nama_panggilan_pria" value="{% if form_data %}{{ form_data.nama_panggilan_pria }}{% else %}{{ undangan.nama_panggilan_pria|default:'' }}{% endif %}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Nama panggilan">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap Wanita *</label>
+                                <input type="text" name="nama_lengkap_wanita" value="{% if form_data %}{{ form_data.nama_lengkap_wanita }}{% else %}{{ undangan.nama_lengkap_wanita|default:'' }}{% endif %}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Nama lengkap">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap Pria *</label>
+                                <input type="text" name="nama_lengkap_pria" value="{% if form_data %}{{ form_data.nama_lengkap_pria }}{% else %}{{ undangan.nama_lengkap_pria|default:'' }}{% endif %}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Nama lengkap">
+                            </div>
+                        </div>
+                        
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Info Orang Tua Wanita</label>
+                                <input type="text" name="info_orang_tua_wanita" value="{% if form_data %}{{ form_data.info_orang_tua_wanita }}{% else %}{{ undangan.info_orang_tua_wanita|default:'' }}{% endif %}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Putri dari Bapak ... & Ibu ...">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Info Orang Tua Pria</label>
+                                <input type="text" name="info_orang_tua_pria" value="{% if form_data %}{{ form_data.info_orang_tua_pria }}{% else %}{{ undangan.info_orang_tua_pria|default:'' }}{% endif %}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Putra dari Bapak ... & Ibu ...">
+                            </div>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Kutipan Pembuka</label>
+                                <textarea name="kutipan_pembuka" rows="2" maxlength="300" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Kutipan pembuka">{% if form_data %}{{ form_data.kutipan_pembuka }}{% else %}{{ undangan.kutipan_pembuka|default:'' }}{% endif %}</textarea>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Sumber Kutipan</label>
+                                <input type="text" name="sumber_kutipan" value="{% if form_data %}{{ form_data.sumber_kutipan }}{% else %}{{ undangan.sumber_kutipan|default:'' }}{% endif %}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Sumber kutipan">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Media & Photos -->
+                    <div class="form-section rounded-xl p-4 card-shadow">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-green-100 w-8 h-8 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-camera text-green-600 text-sm"></i>
+                            </div>
+                            <h2 class="font-dancing text-xl text-gray-800">Foto & Media</h2>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Foto Cover</label>
+                                <input type="file" name="foto_cover" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                {% if undangan.foto_cover %}
+                                <div class="mt-1">
+                                    <img src="{{ undangan.foto_cover.url }}" alt="Cover" class="w-20 h-16 object-cover rounded">
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">File Musik</label>
+                                <input type="file" name="file_musik" accept="audio/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                {% if undangan.file_musik %}
+                                <div class="mt-1">
+                                    <audio controls class="w-full h-8">
+                                        <source src="{{ undangan.file_musik.url }}" type="audio/mpeg">
+                                    </audio>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Foto Wanita</label>
+                                <input type="file" name="foto_wanita" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                {% if undangan.foto_wanita %}
+                                <div class="mt-1">
+                                    <img src="{{ undangan.foto_wanita.url }}" alt="Bride" class="w-16 h-16 object-cover rounded">
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Foto Pria</label>
+                                <input type="file" name="foto_pria" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                {% if undangan.foto_pria %}
+                                <div class="mt-1">
+                                    <img src="{{ undangan.foto_pria.url }}" alt="Groom" class="w-16 h-16 object-cover rounded">
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Couple Information -->
+                    <div class="form-section rounded-xl p-4 card-shadow">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-purple-100 w-8 h-8 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-users text-purple-600 text-sm"></i>
+                            </div>
+                            <h2 class="font-dancing text-xl text-gray-800">Data Mempelai</h2>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <!-- Bride Info -->
+                            <div class="space-y-3">
+                                <h3 class="font-medium text-pink-600 text-sm flex items-center">
+                                    <i class="fas fa-female mr-2"></i>Mempelai Wanita
+                                </h3>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Ayah</label>
+                                    <input type="text" name="nama_ayah_wanita" value="{{ undangan.nama_ayah_wanita|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Nama ayah">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Ibu</label>
+                                    <input type="text" name="nama_ibu_wanita" value="{{ undangan.nama_ibu_wanita|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Nama ibu">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Instagram</label>
+                                    <input type="text" name="instagram_wanita" value="{{ undangan.instagram_wanita|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="username">
+                                </div>
+                            </div>
+                            
+                            <!-- Groom Info -->
+                            <div class="space-y-3">
+                                <h3 class="font-medium text-blue-600 text-sm flex items-center">
+                                    <i class="fas fa-male mr-2"></i>Mempelai Pria
+                                </h3>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Ayah</label>
+                                    <input type="text" name="nama_ayah_pria" value="{{ undangan.nama_ayah_pria|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Nama ayah">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Ibu</label>
+                                    <input type="text" name="nama_ibu_pria" value="{{ undangan.nama_ibu_pria|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Nama ibu">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Instagram</label>
+                                    <input type="text" name="instagram_pria" value="{{ undangan.instagram_pria|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="username">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                     
+                     <!-- Event Information -->
+                     <div class="form-section rounded-xl p-4 card-shadow">
+                         <div class="flex items-center mb-4">
+                             <div class="bg-purple-100 w-8 h-8 rounded-full flex items-center justify-center mr-3">
+                                 <i class="fas fa-calendar-alt text-purple-600 text-sm"></i>
+                             </div>
+                             <h2 class="font-dancing text-xl text-gray-800">Informasi Acara</h2>
+                         </div>
+                         
+                         <div class="grid md:grid-cols-2 gap-4">
+                             <div>
+                                 <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Akad</label>
+                                 <input type="datetime-local" name="tanggal_akad" value="{{ undangan.tanggal_akad|date:'Y-m-d\TH:i'|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                             </div>
+                             
+                             <div>
+                                 <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Resepsi</label>
+                                 <input type="datetime-local" name="tanggal_resepsi" value="{{ undangan.tanggal_resepsi|date:'Y-m-d\TH:i'|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                             </div>
+                             
+                             <div>
+                                 <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Akad</label>
+                                 <textarea name="alamat_akad" rows="2" maxlength="200" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Alamat lengkap tempat akad">{{ undangan.alamat_akad|default:'' }}</textarea>
+                             </div>
+                             
+                             <div>
+                                 <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Resepsi</label>
+                                 <textarea name="alamat_resepsi" rows="2" maxlength="200" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Alamat lengkap tempat resepsi">{{ undangan.alamat_resepsi|default:'' }}</textarea>
+                             </div>
+                             
+                             <div>
+                                 <label class="block text-sm font-medium text-gray-700 mb-1">Link Maps Akad</label>
+                                 <input type="url" name="link_google_maps_akad" value="{{ undangan.link_google_maps_akad|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="https://maps.google.com/...">
+                             </div>
+                             
+                             <div>
+                                 <label class="block text-sm font-medium text-gray-700 mb-1">Link Maps Resepsi</label>
+                                 <input type="url" name="link_google_maps_resepsi" value="{{ undangan.link_google_maps_resepsi|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="https://maps.google.com/...">
+                             </div>
+                         </div>
+                     </div>
+                    
+                    <!-- Event Details -->
+                    <div class="form-section rounded-xl p-4 card-shadow">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-orange-100 w-8 h-8 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-calendar text-orange-600 text-sm"></i>
+                            </div>
+                            <h2 class="font-dancing text-xl text-gray-800">Detail Acara</h2>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <!-- Akad Nikah -->
+                            <div class="space-y-3">
+                                <h3 class="font-medium text-pink-600 text-sm flex items-center">
+                                    <i class="fas fa-ring mr-2"></i>Akad Nikah
+                                </h3>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+                                    <input type="date" name="akad_date" value="{{ undangan.akad_date|date:'Y-m-d'|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Waktu</label>
+                                    <input type="time" name="akad_time" value="{{ undangan.akad_time|time:'H:i'|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tempat</label>
+                                    <input type="text" name="akad_venue" value="{{ undangan.akad_venue|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Nama tempat">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
+                                    <textarea name="akad_address" rows="2" maxlength="200" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Alamat lengkap">{{ undangan.akad_address|default:'' }}</textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Link Maps</label>
+                                    <input type="url" name="akad_maps_url" value="{{ undangan.akad_maps_url|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="https://maps.google.com/...">
+                                </div>
+                            </div>
+                            
+                            <!-- Resepsi -->
+                            <div class="space-y-3">
+                                <h3 class="font-medium text-orange-600 text-sm flex items-center">
+                                    <i class="fas fa-glass-cheers mr-2"></i>Resepsi
+                                </h3>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+                                    <input type="date" name="reception_date" value="{{ undangan.reception_date|date:'Y-m-d'|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Waktu</label>
+                                    <input type="time" name="reception_time" value="{{ undangan.reception_time|time:'H:i'|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tempat</label>
+                                    <input type="text" name="reception_venue" value="{{ undangan.reception_venue|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Nama tempat">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
+                                    <textarea name="reception_address" rows="2" maxlength="200" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Alamat lengkap">{{ undangan.reception_address|default:'' }}</textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Link Maps</label>
+                                    <input type="url" name="reception_maps_url" value="{{ undangan.reception_maps_url|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="https://maps.google.com/...">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Gift & Bank Information -->
+                    <div class="form-section rounded-xl p-4 card-shadow">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-yellow-100 w-8 h-8 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-gift text-yellow-600 text-sm"></i>
+                            </div>
+                            <h2 class="font-dancing text-xl text-gray-800">Informasi Hadiah</h2>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Bank</label>
+                                <input type="text" name="nama_bank" value="{{ undangan.nama_bank|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="BCA, Mandiri, BNI">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Rekening</label>
+                                <input type="text" name="nomor_rekening" value="{{ undangan.nomor_rekening|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Nomor rekening">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pemilik</label>
+                                <input type="text" name="nama_pemilik_rekening" value="{{ undangan.nama_pemilik_rekening|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Nama sesuai rekening">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Hadiah</label>
+                                <textarea name="alamat_hadiah" rows="2" maxlength="250" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Alamat untuk pengiriman hadiah">{{ undangan.alamat_hadiah|default:'' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+
+            </div>
+        </form>
+    </main>
+    
+    <!-- Scripts -->
+    <script>
+        // Template selection functionality
+        function selectTemplate(templateId, templateName, previewImage) {
+            document.getElementById('selectedTemplateId').value = templateId;
+            
+            // Update template selection display
+            const templateOptions = document.querySelectorAll('.template-option');
+            templateOptions.forEach(option => option.classList.remove('border-pink-500', 'bg-pink-50'));
+            
+            const selectedOption = document.querySelector(`[data-template-id="${templateId}"]`);
+            if (selectedOption) {
+                selectedOption.classList.add('border-pink-500', 'bg-pink-50');
+            }
+            
+            // Update preview with template information
+            updateTemplatePreview(templateId, templateName);
+        }
+        
+        // Update template preview
+        function updateTemplatePreview(templateId, templateName) {
+            // Update template indicator
+            const templateIndicator = document.getElementById('templateIndicator');
+            const selectedTemplateName = document.getElementById('selectedTemplateName');
+            
+            if (templateIndicator && selectedTemplateName) {
+                if (templateName) {
+                    templateIndicator.className = 'inline-block bg-green-100 border border-green-300 rounded-full px-3 py-1 text-xs text-green-700';
+                    selectedTemplateName.innerHTML = `<i class="fas fa-check-circle mr-1"></i>${templateName}`;
+                } else {
+                    templateIndicator.className = 'inline-block bg-white bg-opacity-80 rounded-full px-3 py-1 text-xs text-gray-600';
+                    selectedTemplateName.innerHTML = 'Pilih Template';
+                }
+            }
+            
+            // Load actual template preview if templateId is provided
+            if (templateId) {
+                loadTemplatePreview(templateId);
+            } else {
+                // Reset to default preview
+                resetPreviewToDefault();
+            }
+        }
+        
+        // Load actual template preview via AJAX
+        function loadTemplatePreview(templateId) {
+            // Get current form data for preview
+            const formData = {
+                nama_panggilan_wanita: document.querySelector('input[name="nama_panggilan_wanita"]')?.value || 'Jane',
+                nama_panggilan_pria: document.querySelector('input[name="nama_panggilan_pria"]')?.value || 'John',
+                nama_lengkap_wanita: document.querySelector('input[name="nama_lengkap_wanita"]')?.value || 'Jane Smith',
+                nama_lengkap_pria: document.querySelector('input[name="nama_lengkap_pria"]')?.value || 'John Doe',
+                tanggal_akad: document.querySelector('input[name="tanggal_akad"]')?.value || '2024-06-15',
+                alamat_resepsi: document.querySelector('textarea[name="alamat_resepsi"]')?.value || 'Gedung Serbaguna',
+                slug: document.querySelector('input[name="slug"]')?.value || 'preview-undangan'
+            };
+            
+            // Build query string
+            const queryString = new URLSearchParams(formData).toString();
+            
+            // Show loading state - target the correct container
+            const previewContainer = document.querySelector('.h-full.bg-gradient-to-br');
+            if (previewContainer) {
+                previewContainer.innerHTML = '<div class="flex items-center justify-center h-full"><div class="text-center"><i class="fas fa-spinner fa-spin text-2xl text-gray-400 mb-2"></i><p class="text-gray-500">Memuat preview...</p></div></div>';
+            }
+            
+            // Fetch template preview
+            fetch(`/editor/api/template-preview/${templateId}/?${queryString}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Create iframe to display template
+                        const iframe = document.createElement('iframe');
+                        iframe.className = 'w-full h-full border-0';
+                        iframe.srcdoc = data.html;
+                        
+                        if (previewContainer) {
+                            previewContainer.innerHTML = '';
+                            previewContainer.appendChild(iframe);
+                        }
+                    } else {
+                        console.error('Error loading template preview:', data.error);
+                        resetPreviewToDefault();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching template preview:', error);
+                    resetPreviewToDefault();
+                });
+        }
+        
+        // Reset preview to default state
+        function resetPreviewToDefault() {
+            const previewContainer = document.querySelector('.h-full.bg-gradient-to-br');
+            if (previewContainer) {
+                previewContainer.innerHTML = `
+                    <div class="text-center space-y-4">
+                        <!-- Template Indicator -->
+                        <div class="mb-4">
+                            <div id="templateIndicator" class="inline-block bg-white bg-opacity-80 rounded-full px-3 py-1 text-xs text-gray-600">
+                                <i class="fas fa-palette mr-1"></i>
+                                <span id="selectedTemplateName">Pilih Template</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h4 class="font-great-vibes text-xl text-gray-800 mb-1" id="previewBrideName">
+                                Nama Mempelai Wanita
+                            </h4>
+                            <div class="text-gray-600 text-lg font-dancing">&</div>
+                            <h4 class="font-great-vibes text-xl text-gray-800" id="previewGroomName">
+                                Nama Mempelai Pria
+                            </h4>
+                        </div>
+                        
+                        <div class="bg-white bg-opacity-70 rounded-lg p-4 text-sm text-gray-700">
+                            <p class="font-semibold mb-1">Tanggal Pernikahan</p>
+                            <p id="previewWeddingDate" class="mb-3">
+                                Tanggal Pernikahan
+                            </p>
+                            <p class="font-semibold mb-1">Tempat Resepsi</p>
+                            <p id="previewVenue">
+                                Tempat Resepsi
+                            </p>
+                        </div>
+                        
+                        <div class="text-xs text-gray-500">
+                            <p>URL Undangan:</p>
+                            <p class="font-mono">/undangan/<span id="previewSlug">url-undangan</span>/</p>
+                        </div>
+                    </div>
+                `;
+            }
+            updatePreview();
+        }
+        
+        // Real-time preview updates
+        function updatePreview() {
+            const brideNameInput = document.querySelector('input[name="nama_panggilan_wanita"]');
+            const groomNameInput = document.querySelector('input[name="nama_panggilan_pria"]');
+            const weddingDateInput = document.querySelector('input[name="tanggal_akad"]');
+            const venueInput = document.querySelector('textarea[name="alamat_resepsi"]');
+            const slugInput = document.querySelector('input[name="slug"]');
+            
+            const brideName = brideNameInput ? brideNameInput.value : '';
+            const groomName = groomNameInput ? groomNameInput.value : '';
+            const weddingDate = weddingDateInput ? weddingDateInput.value : '';
+            const venue = venueInput ? venueInput.value : '';
+            const slug = slugInput ? slugInput.value : '';
+            
+            // Update preview elements (for default preview)
+            const previewBrideName = document.getElementById('previewBrideName');
+            const previewGroomName = document.getElementById('previewGroomName');
+            const previewWeddingDate = document.getElementById('previewWeddingDate');
+            const previewVenue = document.getElementById('previewVenue');
+            const previewSlug = document.getElementById('previewSlug');
+            const slugPreview = document.getElementById('slugPreview');
+            
+            if (previewBrideName) previewBrideName.textContent = brideName || 'Nama Mempelai Wanita';
+            if (previewGroomName) previewGroomName.textContent = groomName || 'Nama Mempelai Pria';
+            if (previewVenue) previewVenue.textContent = venue || 'Tempat Resepsi';
+            if (previewSlug) previewSlug.textContent = slug || 'url-undangan';
+            if (slugPreview) slugPreview.textContent = slug || 'url-undangan-anda';
+            
+            if (weddingDate && previewWeddingDate) {
+                const date = new Date(weddingDate);
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                previewWeddingDate.textContent = date.toLocaleDateString('id-ID', options);
+            } else if (previewWeddingDate) {
+                previewWeddingDate.textContent = 'Tanggal Pernikahan';
+            }
+            
+            // If a template is selected, reload the template preview with updated data
+            const selectedTemplateId = document.getElementById('selectedTemplateId').value;
+            if (selectedTemplateId) {
+                // Debounce the template reload to avoid too many requests
+                clearTimeout(window.previewUpdateTimeout);
+                window.previewUpdateTimeout = setTimeout(() => {
+                    loadTemplatePreview(selectedTemplateId);
+                }, 500);
+            }
+        }
+        
+        // Add event listeners for real-time updates
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = ['nama_panggilan_wanita', 'nama_panggilan_pria', 'tanggal_akad', 'alamat_resepsi', 'slug'];
+            
+            inputs.forEach(inputName => {
+                const input = document.querySelector(`input[name="${inputName}"], textarea[name="${inputName}"]`);
+                if (input) {
+                    input.addEventListener('input', updatePreview);
+                }
+            });
+            
+            // Auto-generate slug from bride and groom names
+            const brideNameInput = document.querySelector('input[name="nama_panggilan_wanita"]');
+            const groomNameInput = document.querySelector('input[name="nama_panggilan_pria"]');
+            const slugInput = document.querySelector('input[name="slug"]');
+            
+            function generateSlug() {
+                if (slugInput && (!slugInput.value || slugInput.value === slugInput.getAttribute('data-original'))) {
+                    const brideName = brideNameInput ? brideNameInput.value.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
+                    const groomName = groomNameInput ? groomNameInput.value.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
+                    
+                    if (brideName && groomName) {
+                        const newSlug = `${brideName}-${groomName}`;
+                        slugInput.value = newSlug;
+                        slugInput.setAttribute('data-original', newSlug);
+                        updatePreview();
+                    }
+                }
+            }
+            
+            if (brideNameInput) brideNameInput.addEventListener('blur', generateSlug);
+            if (groomNameInput) groomNameInput.addEventListener('blur', generateSlug);
+            
+            // Validate slug format
+            if (slugInput) {
+                slugInput.addEventListener('input', function() {
+                    this.value = this.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+                    updatePreview();
+                });
+            }
+            
+            // Template selection event listeners
+            const templateOptions = document.querySelectorAll('.template-option');
+            templateOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const templateId = this.getAttribute('data-template-id');
+                    const templateName = this.querySelector('h3').textContent;
+                    selectTemplate(templateId, templateName);
+                });
+            });
+            
+            // Initialize selected template if exists
+            const selectedTemplateId = document.getElementById('selectedTemplateId').value;
+            if (selectedTemplateId) {
+                const selectedOption = document.querySelector(`[data-template-id="${selectedTemplateId}"]`);
+                if (selectedOption) {
+                    const templateName = selectedOption.querySelector('h3').textContent;
+                    selectTemplate(selectedTemplateId, templateName);
+                }
+            }
+            
+            // Setup field validation
+            setupFieldValidation();
+            
+            // Initial preview update
+            updatePreview();
+        });
+        
+        // Enhanced form validation
+        function validateField(field, fieldName) {
+            const value = field.value.trim();
+            let isValid = true;
+            let errorMessage = '';
+            
+            // Remove existing error styling
+            field.classList.remove('border-red-500', 'border-green-500');
+            const existingError = field.parentNode.querySelector('.error-message');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            // Required field validation
+            if (!value) {
+                isValid = false;
+                errorMessage = 'Field ini wajib diisi';
+            } else {
+                // Specific field validations
+                switch(fieldName) {
+                    case 'slug':
+                        if (!/^[a-z0-9-]+$/.test(value)) {
+                            isValid = false;
+                            errorMessage = 'URL hanya boleh mengandung huruf kecil, angka, dan tanda hubung';
+                        } else if (value.length < 3) {
+                            isValid = false;
+                            errorMessage = 'URL minimal 3 karakter';
+                        }
+                        break;
+                    case 'tanggal_akad':
+                    case 'tanggal_resepsi':
+                        const selectedDate = new Date(value);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        if (selectedDate < today) {
+                            isValid = false;
+                            errorMessage = 'Tanggal tidak boleh di masa lalu';
+                        }
+                        break;
+                    case 'jam_akad':
+                    case 'jam_resepsi':
+                        if (!/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value)) {
+                            isValid = false;
+                            errorMessage = 'Format jam harus HH:MM (contoh: 14:30)';
+                        }
+                        break;
+                }
+            }
+            
+            // Apply styling and show error message
+            if (isValid) {
+                field.classList.add('border-green-500');
+            } else {
+                field.classList.add('border-red-500');
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message text-red-500 text-sm mt-1';
+                errorDiv.textContent = errorMessage;
+                field.parentNode.appendChild(errorDiv);
+            }
+            
+            return isValid;
+        }
+        
+        // Real-time validation for all form fields
+        function setupFieldValidation() {
+            const requiredFields = [
+                'judul', 'nama_panggilan_wanita', 'nama_panggilan_pria', 
+                'nama_lengkap_wanita', 'nama_lengkap_pria', 'slug',
+                'tanggal_akad', 'jam_akad', 'alamat_akad',
+                'tanggal_resepsi', 'jam_resepsi', 'alamat_resepsi'
+            ];
+            
+            // Add validation for optional fields that have specific format requirements
+            const optionalFields = ['jam_akad', 'jam_resepsi', 'slug'];
+            
+            [...requiredFields, ...optionalFields].forEach(fieldName => {
+                const field = document.querySelector(`input[name="${fieldName}"], textarea[name="${fieldName}"]`);
+                if (field) {
+                    // Validate on blur (when user leaves the field)
+                    field.addEventListener('blur', function() {
+                        if (this.value.trim() || requiredFields.includes(fieldName)) {
+                            validateField(this, fieldName);
+                        }
+                    });
+                    
+                    // Clear error styling on focus
+                    field.addEventListener('focus', function() {
+                        this.classList.remove('border-red-500');
+                        const errorMsg = this.parentNode.querySelector('.error-message');
+                        if (errorMsg) {
+                            errorMsg.remove();
+                        }
+                    });
+                    
+                    // Add input event for immediate feedback on certain fields
+                    if (fieldName === 'slug') {
+                        field.addEventListener('input', function() {
+                            // Auto-format slug
+                            this.value = this.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+                            
+                            // Show real-time validation for slug
+                            if (this.value.length > 0) {
+                                setTimeout(() => {
+                                    validateField(this, fieldName);
+                                }, 300);
+                            }
+                        });
+                    }
+                }
+            });
+            
+            // Add character counter for text areas
+            const textAreas = document.querySelectorAll('textarea');
+            textAreas.forEach(textarea => {
+                const maxLength = textarea.getAttribute('maxlength');
+                if (maxLength) {
+                    const counter = document.createElement('div');
+                    counter.className = 'text-sm text-gray-500 mt-1 text-right';
+                    counter.textContent = `0/${maxLength}`;
+                    textarea.parentNode.appendChild(counter);
+                    
+                    textarea.addEventListener('input', function() {
+                        const currentLength = this.value.length;
+                        counter.textContent = `${currentLength}/${maxLength}`;
+                        
+                        if (currentLength > maxLength * 0.9) {
+                            counter.className = 'text-sm text-orange-500 mt-1 text-right';
+                        } else {
+                            counter.className = 'text-sm text-gray-500 mt-1 text-right';
+                        }
+                    });
+                }
+            });
+        }
+        
+        // Form submission validation
+        document.getElementById('undanganForm').addEventListener('submit', function(e) {
+            const requiredFields = [
+                'judul', 'nama_panggilan_wanita', 'nama_panggilan_pria', 
+                'nama_lengkap_wanita', 'nama_lengkap_pria', 'slug',
+                'tanggal_akad', 'jam_akad', 'alamat_akad',
+                'tanggal_resepsi', 'jam_resepsi', 'alamat_resepsi'
+            ];
+            
+            let isValid = true;
+            let firstInvalidField = null;
+            
+            // Validate all required fields
+            requiredFields.forEach(fieldName => {
+                const field = document.querySelector(`input[name="${fieldName}"], textarea[name="${fieldName}"]`);
+                if (field) {
+                    const fieldValid = validateField(field, fieldName);
+                    if (!fieldValid && !firstInvalidField) {
+                        firstInvalidField = field;
+                    }
+                    isValid = isValid && fieldValid;
+                }
+            });
+            
+            // Check if template is selected
+            const selectedTemplateId = document.getElementById('selectedTemplateId').value;
+            if (!selectedTemplateId) {
+                isValid = false;
+                const templateSection = document.querySelector('.template-grid');
+                if (templateSection) {
+                    templateSection.scrollIntoView({ behavior: 'smooth' });
+                    // Show template selection error
+                    let templateError = document.querySelector('.template-error');
+                    if (!templateError) {
+                        templateError = document.createElement('div');
+                        templateError.className = 'template-error bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4';
+                        templateError.innerHTML = '<strong>Error:</strong> Silakan pilih template undangan terlebih dahulu.';
+                        templateSection.parentNode.insertBefore(templateError, templateSection);
+                    }
+                }
+            } else {
+                // Remove template error if exists
+                const templateError = document.querySelector('.template-error');
+                if (templateError) {
+                    templateError.remove();
+                }
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                
+                // Focus on first invalid field
+                if (firstInvalidField) {
+                    firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => {
+                        firstInvalidField.focus();
+                    }, 300);
+                }
+                
+                // Show summary error message
+                const existingSummary = document.querySelector('.validation-summary');
+                if (existingSummary) {
+                    existingSummary.remove();
+                }
+                
+                const summaryDiv = document.createElement('div');
+                summaryDiv.className = 'validation-summary bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 fixed top-4 right-4 z-50 max-w-sm';
+                summaryDiv.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <strong>Periksa kembali form Anda!</strong><br>
+                            <small>Pastikan semua field yang wajib sudah diisi dengan benar.</small>
+                        </div>
+                        <button type="button" onclick="this.parentNode.parentNode.remove()" class="ml-2 text-red-700 hover:text-red-900">
+                            ×
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(summaryDiv);
+                
+                // Auto remove after 5 seconds
+                setTimeout(() => {
+                    if (summaryDiv.parentNode) {
+                        summaryDiv.remove();
+                    }
+                }, 5000);
+            }
+        });
+        
+        // File upload preview
+        function setupFilePreview(inputName, previewId) {
+            const input = document.querySelector(`input[name="${inputName}"]`);
+            if (input) {
+                input.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            let preview = document.getElementById(previewId);
+                            if (!preview) {
+                                preview = document.createElement('img');
+                                preview.id = previewId;
+                                preview.className = 'w-20 h-20 object-cover rounded-lg mt-2';
+                                input.parentNode.appendChild(preview);
+                            }
+                            preview.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+        }
+        
+        // Setup file previews
+        setupFilePreview('foto_cover', 'fotoCoverPreview');
+        setupFilePreview('foto_wanita', 'fotoWanitaPreview');
+        setupFilePreview('foto_pria', 'fotoPriaPreview');
+        
+        // Open template preview in new window
+        function openTemplatePreview() {
+            const selectedTemplateId = document.getElementById('selectedTemplateId').value;
+            
+            if (!selectedTemplateId) {
+                alert('Silakan pilih template terlebih dahulu!');
+                return;
+            }
+            
+            // Get current form data for preview
+            const formData = {
+                nama_panggilan_wanita: document.querySelector('input[name="nama_panggilan_wanita"]')?.value || 'Jane',
+                nama_panggilan_pria: document.querySelector('input[name="nama_panggilan_pria"]')?.value || 'John',
+                nama_lengkap_wanita: document.querySelector('input[name="nama_lengkap_wanita"]')?.value || 'Jane Smith',
+                nama_lengkap_pria: document.querySelector('input[name="nama_lengkap_pria"]')?.value || 'John Doe',
+                tanggal_akad: document.querySelector('input[name="tanggal_akad"]')?.value || '2024-06-15',
+                alamat_resepsi: document.querySelector('textarea[name="alamat_resepsi"]')?.value || 'Gedung Serbaguna',
+                slug: document.querySelector('input[name="slug"]')?.value || 'preview-undangan',
+                judul: document.querySelector('input[name="judul"]')?.value || 'Preview Undangan',
+                kutipan_pembuka: document.querySelector('textarea[name="kutipan_pembuka"]')?.value || '',
+                sumber_kutipan: document.querySelector('input[name="sumber_kutipan"]')?.value || ''
+            };
+            
+            // Build query string
+            const queryString = new URLSearchParams(formData).toString();
+            
+            // Open preview in new window
+            const previewUrl = `/editor/api/template-preview/${selectedTemplateId}/?${queryString}`;
+            
+            // Fetch the preview HTML and open in new window
+            fetch(previewUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const previewWindow = window.open('', '_blank', 'width=400,height=800,scrollbars=yes,resizable=yes');
+                        previewWindow.document.write(data.html);
+                        previewWindow.document.close();
+                    } else {
+                        alert('Error loading preview: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching template preview:', error);
+                    alert('Error loading preview. Please try again.');
+                });
+        }
+    </script>
+</body>
+</html>

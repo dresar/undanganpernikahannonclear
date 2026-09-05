@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ template.name }} - Template Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .hero-section {
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80');
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+        }
+        .couple-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .event-section {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .story-section {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        .gallery-section {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+        .gift-section {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+        .comment-section {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+        .dancing-script {
+            font-family: 'Dancing Script', cursive;
+        }
+        .poppins {
+            font-family: 'Poppins', sans-serif;
+        }
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .fade-in {
+            animation: fadeIn 1s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .heart-beat {
+            animation: heartBeat 1.5s ease-in-out infinite;
+        }
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .music-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .preview-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        .preview-content {
+            margin-top: 80px;
+        }
+        .template-info {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .use-template-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        .use-template-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .gallery-item {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .story-timeline {
+            position: relative;
+        }
+        .story-timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+            transform: translateX(-50%);
+        }
+        .story-item {
+            position: relative;
+            margin-bottom: 40px;
+        }
+        .story-item::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 20px;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            border: 4px solid white;
+            box-shadow: 0 0 0 4px #667eea;
+        }
+        .story-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin: 0 20px;
+        }
+        .story-item:nth-child(even) .story-content {
+            margin-left: 60%;
+        }
+        .story-item:nth-child(odd) .story-content {
+            margin-right: 60%;
+        }
+    </style>
+</head>
+<body class="poppins">
+    <!-- Preview Header -->
+    <div class="preview-header">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <a href="javascript:history.back()" class="text-gray-600 hover:text-gray-800 transition-colors">
+                        <i class="fas fa-arrow-left text-xl"></i>
+                    </a>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">{{ template.name }}</h1>
+                        <p class="text-sm text-gray-500">Template Preview</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-sm text-gray-500">Category: {{ template.category.name }}</span>
+                    <a href="{% url 'template_editor:create_invitation' template.id %}" class="use-template-btn">
+                        <i class="fas fa-magic"></i>
+                        Use This Template
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="preview-content">
+        <!-- Template Info -->
+        <div class="container mx-auto px-4 py-8">
+            <div class="template-info">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">{{ template.name }}</h2>
+                        <p class="text-gray-600 mb-4">{{ template.description }}</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
+                                {{ template.category.name }}
+                            </span>
+                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                                <i class="fas fa-eye mr-1"></i>{{ template.usage_count|default:0 }} uses
+                            </span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-3xl font-bold text-purple-600 mb-2">
+                            {% if template.price > 0 %}
+                            ${{ template.price }}
+                            {% else %}
+                            Free
+                            {% endif %}
+                        </div>
+                        <p class="text-gray-500 text-sm mb-4">One-time purchase</p>
+                        <div class="flex justify-end gap-2">
+                            <button class="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+                                <i class="fas fa-heart mr-2"></i>Save
+                            </button>
+                            <button class="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+                                <i class="fas fa-share mr-2"></i>Share
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hero Section -->
+        <section class="hero-section flex items-center justify-center text-white text-center">
+            <div class="fade-in">
+                <div class="floating mb-8">
+                    <i class="fas fa-heart heart-beat text-6xl text-pink-300 mb-6"></i>
+                </div>
+                <h1 class="dancing-script text-6xl md:text-8xl font-bold mb-4">John & Jane</h1>
+                <p class="text-xl md:text-2xl mb-8 opacity-90">We're Getting Married!</p>
+                <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-6 inline-block">
+                    <p class="text-lg mb-2">Save the Date</p>
+                    <p class="text-3xl font-bold">December 25, 2024</p>
+                </div>
+                <div class="mt-8">
+                    <button class="bg-white text-purple-600 px-8 py-3 rounded-full font-semibold hover:bg-opacity-90 transition-all">
+                        <i class="fas fa-calendar-check mr-2"></i>RSVP Now
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Couple Section -->
+        <section class="couple-section py-20">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="dancing-script text-5xl font-bold text-white mb-4">The Happy Couple</h2>
+                    <p class="text-white text-xl opacity-90">Two hearts becoming one</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
+                    <!-- Groom -->
+                    <div class="text-center">
+                        <div class="w-64 h-64 mx-auto mb-6 rounded-full overflow-hidden border-8 border-white shadow-2xl">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                                 alt="Groom" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="dancing-script text-4xl font-bold text-white mb-4">John Smith</h3>
+                        <p class="text-white opacity-90 leading-relaxed">
+                            Son of Mr. & Mrs. Robert Smith<br>
+                            Software Engineer at Tech Corp<br>
+                            Loves photography and traveling
+                        </p>
+                        <div class="flex justify-center gap-4 mt-6">
+                            <a href="#" class="text-white hover:text-pink-200 transition-colors">
+                                <i class="fab fa-instagram text-2xl"></i>
+                            </a>
+                            <a href="#" class="text-white hover:text-pink-200 transition-colors">
+                                <i class="fab fa-facebook text-2xl"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Bride -->
+                    <div class="text-center">
+                        <div class="w-64 h-64 mx-auto mb-6 rounded-full overflow-hidden border-8 border-white shadow-2xl">
+                            <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                                 alt="Bride" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="dancing-script text-4xl font-bold text-white mb-4">Jane Doe</h3>
+                        <p class="text-white opacity-90 leading-relaxed">
+                            Daughter of Mr. & Mrs. Michael Doe<br>
+                            Graphic Designer at Creative Studio<br>
+                            Loves art and cooking
+                        </p>
+                        <div class="flex justify-center gap-4 mt-6">
+                            <a href="#" class="text-white hover:text-pink-200 transition-colors">
+                                <i class="fab fa-instagram text-2xl"></i>
+                            </a>
+                            <a href="#" class="text-white hover:text-pink-200 transition-colors">
+                                <i class="fab fa-facebook text-2xl"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Event Details -->
+        <section class="event-section py-20">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="dancing-script text-5xl font-bold text-white mb-4">Wedding Details</h2>
+                    <p class="text-white text-xl opacity-90">Join us on our special day</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <!-- Ceremony -->
+                    <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-8 text-center text-white">
+                        <i class="fas fa-church text-4xl mb-6"></i>
+                        <h3 class="text-2xl font-bold mb-4">Wedding Ceremony</h3>
+                        <div class="space-y-3">
+                            <p><i class="fas fa-calendar mr-2"></i>December 25, 2024</p>
+                            <p><i class="fas fa-clock mr-2"></i>10:00 AM</p>
+                            <p><i class="fas fa-map-marker-alt mr-2"></i>St. Mary's Church<br>123 Wedding Street, City</p>
+                        </div>
+                        <button class="mt-6 bg-white text-blue-600 px-6 py-2 rounded-full font-semibold hover:bg-opacity-90 transition-all">
+                            <i class="fas fa-map mr-2"></i>View Map
+                        </button>
+                    </div>
+                    
+                    <!-- Reception -->
+                    <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-8 text-center text-white">
+                        <i class="fas fa-glass-cheers text-4xl mb-6"></i>
+                        <h3 class="text-2xl font-bold mb-4">Wedding Reception</h3>
+                        <div class="space-y-3">
+                            <p><i class="fas fa-calendar mr-2"></i>December 25, 2024</p>
+                            <p><i class="fas fa-clock mr-2"></i>6:00 PM</p>
+                            <p><i class="fas fa-map-marker-alt mr-2"></i>Grand Ballroom<br>456 Reception Ave, City</p>
+                        </div>
+                        <button class="mt-6 bg-white text-blue-600 px-6 py-2 rounded-full font-semibold hover:bg-opacity-90 transition-all">
+                            <i class="fas fa-map mr-2"></i>View Map
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Love Story -->
+        <section class="story-section py-20">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="dancing-script text-5xl font-bold text-white mb-4">Our Love Story</h2>
+                    <p class="text-white text-xl opacity-90">The journey of our hearts</p>
+                </div>
+                <div class="story-timeline max-w-4xl mx-auto">
+                    <div class="story-item">
+                        <div class="story-content">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-3">First Met</h3>
+                            <p class="text-gray-600 mb-3">January 2020</p>
+                            <p class="text-gray-700">We first met at a coffee shop near the university. It was love at first sight when our eyes met across the crowded room.</p>
+                        </div>
+                    </div>
+                    <div class="story-item">
+                        <div class="story-content">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-3">First Date</h3>
+                            <p class="text-gray-600 mb-3">February 2020</p>
+                            <p class="text-gray-700">Our first official date was at the local park. We talked for hours and realized we had so much in common.</p>
+                        </div>
+                    </div>
+                    <div class="story-item">
+                        <div class="story-content">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-3">The Proposal</h3>
+                            <p class="text-gray-600 mb-3">December 2023</p>
+                            <p class="text-gray-700">John proposed during a romantic sunset at our favorite beach. It was the most magical moment of our lives!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery -->
+        <section class="gallery-section py-20">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="dancing-script text-5xl font-bold text-white mb-4">Photo Gallery</h2>
+                    <p class="text-white text-xl opacity-90">Capturing our beautiful moments</p>
+                </div>
+                <div class="gallery-grid max-w-6xl mx-auto">
+                    <div class="gallery-item">
+                        <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                             alt="Gallery 1" class="w-full h-64 object-cover">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://images.unsplash.com/photo-1465495976277-4387d4b0e4a6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                             alt="Gallery 2" class="w-full h-64 object-cover">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://images.unsplash.com/photo-1520854221256-17451cc331bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                             alt="Gallery 3" class="w-full h-64 object-cover">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                             alt="Gallery 4" class="w-full h-64 object-cover">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://images.unsplash.com/photo-1606216794074-735e91aa2c92?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                             alt="Gallery 5" class="w-full h-64 object-cover">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                             alt="Gallery 6" class="w-full h-64 object-cover">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gift Section -->
+        <section class="gift-section py-20">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="dancing-script text-5xl font-bold text-gray-800 mb-4">Wedding Gift</h2>
+                    <p class="text-gray-600 text-xl">Your presence is the greatest gift, but if you wish to honor us with a gift</p>
+                </div>
+                <div class="max-w-2xl mx-auto">
+                    <div class="bg-white rounded-2xl p-8 shadow-2xl">
+                        <div class="text-center mb-8">
+                            <i class="fas fa-gift text-4xl text-purple-600 mb-4"></i>
+                            <h3 class="text-2xl font-bold text-gray-800 mb-4">Send a Gift</h3>
+                            <p class="text-gray-600">You can send your wedding gift through the following accounts:</p>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="bg-gray-50 rounded-lg p-4 flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <i class="fas fa-university text-2xl text-blue-600 mr-4"></i>
+                                    <div>
+                                        <p class="font-semibold text-gray-800">Bank ABC</p>
+                                        <p class="text-gray-600">1234567890 - John Smith</p>
+                                    </div>
+                                </div>
+                                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                    Copy
+                                </button>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-4 flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <i class="fas fa-mobile-alt text-2xl text-green-600 mr-4"></i>
+                                    <div>
+                                        <p class="font-semibold text-gray-800">E-Wallet</p>
+                                        <p class="text-gray-600">0812-3456-7890 - John Smith</p>
+                                    </div>
+                                </div>
+                                <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                    Copy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Comments Section -->
+        <section class="comment-section py-20">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="dancing-script text-5xl font-bold text-gray-800 mb-4">Wedding Wishes</h2>
+                    <p class="text-gray-600 text-xl">Leave your wishes for the happy couple</p>
+                </div>
+                <div class="max-w-4xl mx-auto">
+                    <!-- Comment Form -->
+                    <div class="bg-white rounded-2xl p-8 shadow-2xl mb-8">
+                        <form class="space-y-6">
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-gray-700 font-semibold mb-2">Your Name</label>
+                                    <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="Enter your name">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 font-semibold mb-2">Attendance</label>
+                                    <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                                        <option>Will Attend</option>
+                                        <option>Cannot Attend</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Your Message</label>
+                                <textarea rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="Write your wishes for the couple..."></textarea>
+                            </div>
+                            <button type="submit" class="bg-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors">
+                                <i class="fas fa-paper-plane mr-2"></i>Send Wishes
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Sample Comments -->
+                    <div class="space-y-6">
+                        <div class="bg-white rounded-xl p-6 shadow-lg">
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                                    A
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <h4 class="font-semibold text-gray-800">Alice Johnson</h4>
+                                        <span class="text-sm text-green-600 bg-green-100 px-2 py-1 rounded-full">Will Attend</span>
+                                    </div>
+                                    <p class="text-gray-600">Congratulations to the beautiful couple! Wishing you a lifetime of love and happiness. Can't wait to celebrate with you!</p>
+                                    <p class="text-sm text-gray-400 mt-2">2 hours ago</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-6 shadow-lg">
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                                    B
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <h4 class="font-semibold text-gray-800">Bob Wilson</h4>
+                                        <span class="text-sm text-red-600 bg-red-100 px-2 py-1 rounded-full">Cannot Attend</span>
+                                    </div>
+                                    <p class="text-gray-600">So happy for you both! Unfortunately, I can't make it to the wedding, but I'm sending all my love and best wishes for your special day.</p>
+                                    <p class="text-sm text-gray-400 mt-2">5 hours ago</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-white py-12">
+            <div class="container mx-auto px-4 text-center">
+                <div class="mb-8">
+                    <h3 class="dancing-script text-4xl font-bold mb-4">John & Jane</h3>
+                    <p class="text-gray-300 mb-6">Thank you for being part of our love story</p>
+                    <div class="flex justify-center gap-6">
+                        <a href="#" class="text-gray-300 hover:text-white transition-colors">
+                            <i class="fab fa-instagram text-2xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-white transition-colors">
+                            <i class="fab fa-facebook text-2xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-white transition-colors">
+                            <i class="fab fa-twitter text-2xl"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="border-t border-gray-700 pt-8">
+                    <p class="text-gray-400">&copy; 2024 Wedding Invitation. Made with ❤️ using {{ template.name }}</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Music Control -->
+    <div class="music-control">
+        <button id="musicToggle" class="text-purple-600 hover:text-purple-700 transition-colors">
+            <i class="fas fa-music text-xl"></i>
+        </button>
+    </div>
+
+    <!-- Background Music -->
+    <audio id="backgroundMusic" loop>
+        <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav">
+    </audio>
+
+    <script>
+        // Music control
+        const musicToggle = document.getElementById('musicToggle');
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        let isPlaying = false;
+        
+        musicToggle.addEventListener('click', function() {
+            if (isPlaying) {
+                backgroundMusic.pause();
+                this.innerHTML = '<i class="fas fa-music text-xl"></i>';
+                isPlaying = false;
+            } else {
+                backgroundMusic.play();
+                this.innerHTML = '<i class="fas fa-pause text-xl"></i>';
+                isPlaying = true;
+            }
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Copy to clipboard functionality
+        document.querySelectorAll('button:contains("Copy")')?.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const text = this.parentElement.querySelector('p:last-child').textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    this.textContent = 'Copied!';
+                    setTimeout(() => {
+                        this.textContent = 'Copy';
+                    }, 2000);
+                });
+            });
+        });
+        
+        // Animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all sections
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
+        });
+        
+        // Form submission (demo)
+        document.querySelector('form')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thank you for your wishes! (This is a preview - actual submission would work in the real invitation)');
+        });
+    </script>
+</body>
+</html>

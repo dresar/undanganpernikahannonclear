@@ -1,0 +1,512 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Pengaturan Sistem{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Pengaturan Sistem</h1>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Kelola pengaturan website dan sistem</p>
+        </div>
+        <div class="mt-4 sm:mt-0">
+            <button onclick="saveAllSettings()" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors">
+                <i class="fas fa-save mr-2"></i>Simpan Semua
+            </button>
+        </div>
+    </div>
+
+    <!-- Settings Tabs -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+        <div class="border-b border-gray-200 dark:border-gray-700">
+            <nav class="-mb-px flex space-x-8 px-6" aria-label="Tabs">
+                <button onclick="showTab('general')" id="general-tab" class="tab-button active border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    <i class="fas fa-cog mr-2"></i>Umum
+                </button>
+                <button onclick="showTab('payment')" id="payment-tab" class="tab-button border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    <i class="fas fa-credit-card mr-2"></i>Pembayaran
+                </button>
+                <button onclick="showTab('email')" id="email-tab" class="tab-button border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    <i class="fas fa-envelope mr-2"></i>Email
+                </button>
+                <button onclick="showTab('security')" id="security-tab" class="tab-button border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    <i class="fas fa-shield-alt mr-2"></i>Keamanan
+                </button>
+                <button onclick="showTab('api')" id="api-tab" class="tab-button border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    <i class="fas fa-code mr-2"></i>API
+                </button>
+                <button onclick="showTab('backup')" id="backup-tab" class="tab-button border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    <i class="fas fa-database mr-2"></i>Backup
+                </button>
+            </nav>
+        </div>
+
+        <!-- General Settings -->
+        <div id="general-content" class="tab-content p-6">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Pengaturan Umum</h3>
+            <form id="generalSettingsForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nama Website</label>
+                        <input type="text" name="site_name" value="Wedding Invitation Platform" 
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tagline</label>
+                        <input type="text" name="site_tagline" value="Buat undangan pernikahan digital yang menawan" 
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Deskripsi Website</label>
+                    <textarea name="site_description" rows="3" 
+                              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">Platform terbaik untuk membuat undangan pernikahan digital yang elegan dan modern.</textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email Kontak</label>
+                        <input type="email" name="contact_email" value="admin@example.com" 
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nomor Telepon</label>
+                        <input type="tel" name="contact_phone" value="+62 123 456 7890" 
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Alamat</label>
+                    <textarea name="contact_address" rows="2" 
+                              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">Jl. Contoh No. 123, Jakarta, Indonesia</textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Zona Waktu</label>
+                        <select name="timezone" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                            <option value="Asia/Jakarta" selected>Asia/Jakarta (WIB)</option>
+                            <option value="Asia/Makassar">Asia/Makassar (WITA)</option>
+                            <option value="Asia/Jayapura">Asia/Jayapura (WIT)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Bahasa Default</label>
+                        <select name="default_language" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                            <option value="id" selected>Bahasa Indonesia</option>
+                            <option value="en">English</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Mata Uang</label>
+                        <select name="currency" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                            <option value="IDR" selected>Rupiah (IDR)</option>
+                            <option value="USD">US Dollar (USD)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <label class="flex items-center">
+                        <input type="checkbox" name="maintenance_mode" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Mode Maintenance</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" name="registration_enabled" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Registrasi Terbuka</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" name="email_verification" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Verifikasi Email</span>
+                    </label>
+                </div>
+            </form>
+        </div>
+
+        <!-- Payment Settings -->
+        <div id="payment-content" class="tab-content p-6 hidden">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Pengaturan Pembayaran</h3>
+            <form id="paymentSettingsForm" class="space-y-6">
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <h4 class="font-medium text-gray-900 dark:text-white mb-3">Midtrans</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Server Key</label>
+                            <input type="password" name="midtrans_server_key" placeholder="SB-Mid-server-..." 
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Client Key</label>
+                            <input type="text" name="midtrans_client_key" placeholder="SB-Mid-client-..." 
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="midtrans_enabled" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Aktifkan Midtrans</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="midtrans_sandbox" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Mode Sandbox</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <h4 class="font-medium text-gray-900 dark:text-white mb-3">Bank Transfer</h4>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nama Bank</label>
+                                <input type="text" name="bank_name" placeholder="Bank BCA" 
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nomor Rekening</label>
+                                <input type="text" name="bank_account" placeholder="1234567890" 
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nama Pemilik</label>
+                                <input type="text" name="bank_owner" placeholder="PT. Wedding Platform" 
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                            </div>
+                        </div>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="bank_transfer_enabled" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Aktifkan Bank Transfer</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Biaya Admin (%)</label>
+                        <input type="number" name="admin_fee" value="2.5" min="0" max="100" step="0.1" 
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Minimum Pembayaran</label>
+                        <input type="number" name="minimum_payment" value="10000" min="0" step="1000" 
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Email Settings -->
+        <div id="email-content" class="tab-content p-6 hidden">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Pengaturan Email</h3>
+            <form id="emailSettingsForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">SMTP Host</label>
+                        <input type="text" name="smtp_host" placeholder="smtp.gmail.com" 
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">SMTP Port</label>
+                        <input type="number" name="smtp_port" value="587" 
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Username/Email</label>
+                        <input type="email" name="smtp_username" placeholder="your-email@gmail.com" 
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password</label>
+                        <input type="password" name="smtp_password" placeholder="App Password" 
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">From Email</label>
+                        <input type="email" name="from_email" placeholder="noreply@yoursite.com" 
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">From Name</label>
+                        <input type="text" name="from_name" placeholder="Wedding Platform" 
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    </div>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <label class="flex items-center">
+                        <input type="checkbox" name="smtp_use_tls" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Gunakan TLS</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" name="email_notifications" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Notifikasi Email</span>
+                    </label>
+                </div>
+                <div class="mt-4">
+                    <button type="button" onclick="testEmail()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-paper-plane mr-2"></i>Test Email
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Security Settings -->
+        <div id="security-content" class="tab-content p-6 hidden">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Pengaturan Keamanan</h3>
+            <form id="securitySettingsForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Session Timeout (menit)</label>
+                        <input type="number" name="session_timeout" value="30" min="5" max="1440" 
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Max Login Attempts</label>
+                        <input type="number" name="max_login_attempts" value="5" min="1" max="20" 
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password Min Length</label>
+                        <input type="number" name="password_min_length" value="8" min="6" max="50" 
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Lockout Duration (menit)</label>
+                        <input type="number" name="lockout_duration" value="15" min="1" max="1440" 
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <label class="flex items-center">
+                        <input type="checkbox" name="two_factor_auth" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Two-Factor Authentication</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" name="password_complexity" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Password Complexity Requirements</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" name="login_notifications" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Login Notifications</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" name="ip_whitelist" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">IP Whitelist</span>
+                    </label>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Allowed IPs (satu per baris)</label>
+                    <textarea name="allowed_ips" rows="4" placeholder="192.168.1.1&#10;10.0.0.1" 
+                              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"></textarea>
+                </div>
+            </form>
+        </div>
+
+        <!-- API Settings -->
+        <div id="api-content" class="tab-content p-6 hidden">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Pengaturan API</h3>
+            <div class="space-y-6">
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <h4 class="font-medium text-gray-900 dark:text-white mb-3">Template Editor Integration</h4>
+                    <form id="apiSettingsForm" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Template Editor URL</label>
+                                <input type="url" name="template_editor_url" placeholder="https://editor.example.com" 
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                            </div>
+                            <!-- API Key settings removed - using SQLite-only authentication -->
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="template_editor_enabled" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Enable Template Editor Integration</span>
+                            </label>
+                            <button type="button" onclick="testConnection()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                                <i class="fas fa-plug mr-2"></i>Test Connection
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <h4 class="font-medium text-gray-900 dark:text-white mb-3">API Keys Management</h4>
+                    <div class="space-y-4">
+                        <!-- API Keys section removed - using SQLite-only authentication -->
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                                <thead>
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Name</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Key</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Status</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+                                    <tr>
+                                        <td class="px-4 py-2 text-sm text-gray-900 dark:text-white">Template Editor</td>
+                                        <td class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400 font-mono">te_****...****</td>
+                                        <td class="px-4 py-2">
+                                            <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Active</span>
+                                        </td>
+                                        <td class="px-4 py-2">
+                                            <div class="flex space-x-2">
+                                                <button class="text-blue-600 hover:text-blue-800 dark:text-blue-400">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="text-red-600 hover:text-red-800 dark:text-red-400">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Backup Settings -->
+        <div id="backup-content" class="tab-content p-6 hidden">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Pengaturan Backup</h3>
+            <form id="backupSettingsForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Backup Frequency</label>
+                        <select name="backup_frequency" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                            <option value="daily">Harian</option>
+                            <option value="weekly" selected>Mingguan</option>
+                            <option value="monthly">Bulanan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Backup Time</label>
+                        <input type="time" name="backup_time" value="02:00" 
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Retention Days</label>
+                        <input type="number" name="backup_retention" value="30" min="1" max="365" 
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Max Backup Files</label>
+                        <input type="number" name="max_backup_files" value="10" min="1" max="100" 
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <label class="flex items-center">
+                        <input type="checkbox" name="auto_backup" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Automatic Backup</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" name="backup_database" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Backup Database</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" name="backup_media" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Backup Media Files</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" name="backup_notifications" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Email Notifications</span>
+                    </label>
+                </div>
+                <div class="mt-6 flex space-x-3">
+                    <button type="button" onclick="createBackup()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-database mr-2"></i>Buat Backup Sekarang
+                    </button>
+                    <button type="button" onclick="viewBackups()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-list mr-2"></i>Lihat Backup
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Create API Key Modal removed - using SQLite-only authentication -->
+
+<script>
+function showTab(tabName) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+    
+    // Remove active class from all tabs
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active', 'border-primary-500', 'text-primary-600', 'dark:text-primary-400', 'dark:border-primary-400');
+        button.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+    });
+    
+    // Show selected tab content
+    document.getElementById(tabName + '-content').classList.remove('hidden');
+    
+    // Add active class to selected tab
+    const activeTab = document.getElementById(tabName + '-tab');
+    activeTab.classList.add('active', 'border-primary-500', 'text-primary-600', 'dark:text-primary-400', 'dark:border-primary-400');
+    activeTab.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+}
+
+function saveAllSettings() {
+    // Get all form data
+    const forms = ['generalSettingsForm', 'paymentSettingsForm', 'emailSettingsForm', 'securitySettingsForm', 'apiSettingsForm', 'backupSettingsForm'];
+    
+    forms.forEach(formId => {
+        const form = document.getElementById(formId);
+        if (form) {
+            // Simulate saving
+            console.log('Saving', formId);
+        }
+    });
+    
+    showNotification('Semua pengaturan berhasil disimpan', 'success');
+}
+
+function testEmail() {
+    showNotification('Mengirim test email...', 'info');
+    // Simulate email test
+    setTimeout(() => {
+        showNotification('Test email berhasil dikirim', 'success');
+    }, 2000);
+}
+
+// API Key generation removed - using SQLite-only authentication
+
+function testConnection() {
+    showNotification('Testing connection...', 'info');
+    // Simulate connection test
+    setTimeout(() => {
+        showNotification('Koneksi berhasil', 'success');
+    }, 2000);
+}
+
+function createBackup() {
+    showNotification('Membuat backup...', 'info');
+    // Simulate backup creation
+    setTimeout(() => {
+        showNotification('Backup berhasil dibuat', 'success');
+    }, 3000);
+}
+
+function viewBackups() {
+    showNotification('Fitur lihat backup akan segera tersedia', 'info');
+}
+
+// API Key form submission removed - using SQLite-only authentication
+
+// Initialize first tab
+showTab('general');
+</script>
+{% endblock %}

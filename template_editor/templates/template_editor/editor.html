@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template Editor - AI Powered</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/material.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#64748b',
+                        gemini: '#4285f4'
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-slow': 'bounce 2s infinite'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .code-editor { 
+            height: 400px; 
+            font-family: 'Fira Code', 'Courier New', monospace;
+            border-radius: 8px;
+        }
+        @media (min-width: 768px) {
+            .code-editor { height: 500px; }
+        }
+        .CodeMirror {
+            height: 100%;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .ai-generating {
+            background: linear-gradient(45deg, #4285f4, #34a853, #fbbc05, #ea4335);
+            background-size: 400% 400%;
+            animation: gradient 2s ease infinite;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .modal-backdrop {
+            backdrop-filter: blur(4px);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .dark .glass-effect {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="h-full bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <div class="h-screen flex flex-col">
+        <!-- Header -->
+        <nav class="bg-gradient-to-r from-primary to-gemini dark:from-gray-800 dark:to-gray-900 text-white shadow-xl">
+            <div class="px-4 py-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <a href="javascript:history.back()" class="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors">
+                            <i class="fas fa-arrow-left text-lg"></i>
+                        </a>
+                        <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-gemini" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-bold">AI Template Editor</h1>
+                            <p class="text-xs text-blue-100 dark:text-gray-300">Powered by Gemini AI</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <!-- AI Generate Button -->
+                        <button id="aiGenerateBtn" class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg transition-all transform hover:scale-105 flex items-center space-x-2 shadow-lg">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                            <span class="hidden sm:inline">AI Generate</span>
+                        </button>
+                        
+                        <!-- Dark Mode Toggle -->
+                        <button id="darkModeToggle" class="p-2 rounded-lg bg-white/20 hover:bg-white/30 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
+                            <svg class="w-5 h-5 hidden dark:block" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
+                            </svg>
+                            <svg class="w-5 h-5 block dark:hidden" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                            </svg>
+                        </button>
+                        
+                        <!-- Action Buttons -->
+                        <div class="hidden lg:flex space-x-2">
+                            <button id="saveBtn" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-all transform hover:scale-105 flex items-center space-x-2 shadow-lg">
+                                <i class="fas fa-save"></i>
+                                <span>Save</span>
+                            </button>
+                            <button id="previewBtn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-all transform hover:scale-105 flex items-center space-x-2 shadow-lg">
+                                <i class="fas fa-external-link-alt"></i>
+                                <span>Preview</span>
+                            </button>
+                            <button id="publishBtn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-all transform hover:scale-105 flex items-center space-x-2 shadow-lg">
+                                <i class="fas fa-rocket"></i>
+                                <span>Publish</span>
+                            </button>
+                            <button id="exportBtn" class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-all transform hover:scale-105 flex items-center space-x-2 shadow-lg">
+                                <i class="fas fa-download"></i>
+                                <span>Export</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Mobile Menu Button -->
+                        <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Mobile Action Buttons -->
+                <div id="mobileMenu" class="hidden lg:hidden mt-3 grid grid-cols-2 gap-2">
+                    <button id="saveBtnMobile" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                        <i class="fas fa-save"></i>
+                        <span>Save</span>
+                    </button>
+                    <button id="previewBtnMobile" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                        <i class="fas fa-external-link-alt"></i>
+                        <span>Preview</span>
+                    </button>
+                    <button id="publishBtnMobile" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                        <i class="fas fa-rocket"></i>
+                        <span>Publish</span>
+                    </button>
+                    <button id="exportBtnMobile" class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                        <i class="fas fa-download"></i>
+                        <span>Export</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Editor -->
+        <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
+            <!-- Settings Panel -->
+            <div class="lg:w-1/4 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-4 overflow-y-auto">
+                <!-- AI Assistant -->
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-4 mb-4 border border-purple-200 dark:border-purple-800">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                        <div class="w-6 h-6 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mr-2 flex items-center justify-center">
+                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        </div>
+                        AI Assistant
+                    </h3>
+                    
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Describe your invitation</label>
+                            <textarea id="aiPrompt" rows="3" placeholder="e.g., Create a romantic wedding invitation with gold accents and elegant typography..."
+                                      class="w-full px-3 py-2 border border-purple-300 dark:border-purple-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none text-sm"></textarea>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="generateHtmlBtn" class="px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center space-x-1">
+                                <i class="fab fa-html5"></i>
+                                <span>HTML</span>
+                            </button>
+                            <button id="generateCssBtn" class="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center space-x-1">
+                                <i class="fab fa-css3-alt"></i>
+                                <span>CSS</span>
+                            </button>
+                        </div>
+                        
+                        <button id="generateFullBtn" class="w-full px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg transition-all transform hover:scale-105 flex items-center justify-center space-x-2 shadow-lg">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                            <span>Generate Complete</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Template Settings -->
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-cog mr-2 text-gray-600 dark:text-gray-400"></i>Settings
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Template Name</label>
+                            <input type="text" id="templateNameInput" 
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white" 
+                                   value="{% if template %}{{ template.name }}{% endif %}" placeholder="My Wedding Invitation">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                            <textarea id="templateDescription" rows="3" placeholder="Beautiful wedding invitation template..."
+                                      class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none">{% if template %}{{ template.description }}{% endif %}</textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Music URL</label>
+                            <input type="url" id="musicUrl" 
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white" 
+                                   value="{% if template %}{{ template.music_url }}{% endif %}"
+                                   placeholder="https://example.com/music.mp3">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div>
+                    <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                        <i class="fas fa-magic mr-2 text-yellow-500"></i>Quick Insert
+                    </h4>
+                    <div class="space-y-2">
+                        <button onclick="insertMusicPlayer()" 
+                                class="w-full px-4 py-2 text-left bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all transform hover:scale-105 flex items-center">
+                            <i class="fas fa-music mr-2"></i> Music Player
+                        </button>
+                        <button onclick="insertCountdown()" 
+                                class="w-full px-4 py-2 text-left bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-all transform hover:scale-105 flex items-center">
+                            <i class="fas fa-clock mr-2"></i> Countdown Timer
+                        </button>
+                        <button onclick="insertRSVPForm()" 
+                                class="w-full px-4 py-2 text-left bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all transform hover:scale-105 flex items-center">
+                            <i class="fas fa-envelope mr-2"></i> RSVP Form
+                        </button>
+                        <button onclick="insertGallery()" 
+                                class="w-full px-4 py-2 text-left bg-pink-50 dark:bg-pink-900/20 text-pink-700 dark:text-pink-300 border border-pink-200 dark:border-pink-800 rounded-lg hover:bg-pink-100 dark:hover:bg-pink-900/30 transition-all transform hover:scale-105 flex items-center">
+                            <i class="fas fa-images mr-2"></i> Photo Gallery
+                        </button>
+                        <button onclick="insertMap()" 
+                                class="w-full px-4 py-2 text-left bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-all transform hover:scale-105 flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2"></i> Location Map
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Code Editor Panel -->
+            <div class="flex-1 flex flex-col bg-white dark:bg-gray-800">
+                <!-- Editor Tabs -->
+                <div class="border-b border-gray-200 dark:border-gray-700">
+                    <nav class="flex space-x-1 p-2" id="editorTabs">
+                        <button class="tab-button active px-4 py-2 text-sm font-medium rounded-lg transition-colors" data-target="htmlTab">
+                            <i class="fab fa-html5 mr-1 text-orange-500"></i> HTML
+                        </button>
+                        <button class="tab-button px-4 py-2 text-sm font-medium rounded-lg transition-colors" data-target="cssTab">
+                            <i class="fab fa-css3-alt mr-1 text-blue-500"></i> CSS
+                        </button>
+                        <button class="tab-button px-4 py-2 text-sm font-medium rounded-lg transition-colors" data-target="jsTab">
+                            <i class="fab fa-js-square mr-1 text-yellow-500"></i> JS
+                        </button>
+                    </nav>
+                </div>
+                
+                <!-- Tab Content -->
+                <div class="flex-1 p-4">
+                    <div class="tab-content active" id="htmlTab">
+                        <textarea id="htmlCode" 
+                                  class="code-editor w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary focus:border-transparent">{% if template %}{{ template.html_content|default:'' }}{% else %}<!DOCTYPE html>
+<html>
+<head>
+    <title>Wedding Invitation</title>
+</head>
+<body>
+    <h1>{{ event.groom_nickname }} & {{ event.bride_nickname }}</h1>
+    <p>Wedding Date: {{ event.reception_date }}</p>
+    <audio controls autoplay loop>
+        <source src="{{ event.music_url }}" type="audio/mpeg">
+    </audio>
+</body>
+</html>{% endif %}</textarea>
+                    </div>
+                    
+                    <div class="tab-content hidden" id="cssTab">
+                        <textarea id="cssCode" 
+                                  class="code-editor w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary focus:border-transparent">{% if template %}{{ template.css_content|default:'' }}{% else %}body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    text-align: center;
+    color: white;
+    padding: 20px;
+}
+
+h1 {
+    font-size: 3em;
+    margin-bottom: 20px;
+}{% endif %}</textarea>
+                    </div>
+                    
+                    <div class="tab-content hidden" id="jsTab">
+                        <textarea id="jsCode" 
+                                  class="code-editor w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary focus:border-transparent">{% if template %}{{ template.js_content|default:'' }}{% else %}document.addEventListener('DOMContentLoaded', function() {
+    console.log('Wedding invitation loaded!');
+    
+    const audio = document.querySelector('audio');
+    if (audio) {
+        document.body.addEventListener('click', function() {
+            audio.play().catch(e => console.log('Audio play failed:', e));
+        }, { once: true });
+    }
+});{% endif %}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Panel -->
+            <div class="lg:w-1/3 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 p-4 hidden lg:block">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-eye mr-2"></i>Live Preview
+                </h3>
+                <iframe id="previewFrame" 
+                        class="w-full h-96 lg:h-full border border-gray-300 dark:border-gray-600 rounded-lg bg-white" 
+                        srcdoc="<p style='text-align:center;margin-top:50px;color:#666;'>Preview will appear here...</p>"></iframe>
+            </div>
+        </div>
+        
+        <!-- Mobile Preview Modal -->
+        <div id="previewModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden lg:hidden">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white dark:bg-gray-800 rounded-lg w-full max-w-md max-h-full overflow-hidden">
+                    <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Preview</h3>
+                        <button id="closePreviewModal" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <iframe id="previewFrameMobile" 
+                                class="w-full h-96 border border-gray-300 dark:border-gray-600 rounded-lg" 
+                                srcdoc="<p style='text-align:center;margin-top:50px;color:#666;'>Preview will appear here...</p>"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    
+    <script>
+        let currentTemplate = {% if template %}{
+            id: '{{ template.id }}',
+            name: '{{ template.name }}',
+            description: '{{ template.description }}',
+            html_content: `{{ template.html_content|escapejs }}`,
+            css_content: `{{ template.css_content|escapejs }}`,
+            js_content: `{{ template.js_content|escapejs }}`,
+            music_url: '{{ template.music_url }}'
+        }{% else %}null{% endif %};
+        
+        // Dark mode functionality
+        function initDarkMode() {
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            
+            if (isDarkMode) {
+                document.documentElement.classList.add('dark');
+            }
+            
+            darkModeToggle.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+            });
+        }
+        
+        // Tab functionality
+        function initTabs() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.getAttribute('data-target');
+                    
+                    // Remove active class from all buttons and contents
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.add('hidden'));
+                    
+                    // Add active class to clicked button and show target content
+                    button.classList.add('active');
+                    document.getElementById(targetId).classList.remove('hidden');
+                });
+            });
+        }
+        
+        // Mobile menu functionality
+        function initMobileMenu() {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+        
+        // Preview modal functionality
+        function initPreviewModal() {
+            const previewBtnMobile = document.getElementById('previewBtnMobile');
+            const previewModal = document.getElementById('previewModal');
+            const closePreviewModal = document.getElementById('closePreviewModal');
+            
+            previewBtnMobile.addEventListener('click', () => {
+                updatePreview();
+                updateMobilePreview();
+                previewModal.classList.remove('hidden');
+            });
+            
+            closePreviewModal.addEventListener('click', () => {
+                previewModal.classList.add('hidden');
+            });
+            
+            previewModal.addEventListener('click', (e) => {
+                if (e.target === previewModal) {
+                    previewModal.classList.add('hidden');
+                }
+            });
+        }
+        
+        // Auto-update preview
+        document.addEventListener('DOMContentLoaded', function() {
+            initDarkMode();
+            initTabs();
+            initMobileMenu();
+            initPreviewModal();
+            
+            const htmlCode = document.getElementById('htmlCode');
+            const cssCode = document.getElementById('cssCode');
+            const jsCode = document.getElementById('jsCode');
+            
+            [htmlCode, cssCode, jsCode].forEach(editor => {
+                editor.addEventListener('input', debounce(updatePreview, 500));
+            });
+            
+            updatePreview();
+            
+            // Save buttons
+            document.getElementById('saveBtn').addEventListener('click', saveTemplate);
+            document.getElementById('saveBtnMobile').addEventListener('click', saveTemplate);
+            document.getElementById('previewBtn').addEventListener('click', updatePreview);
+            document.getElementById('exportBtn').addEventListener('click', exportTemplate);
+            document.getElementById('exportBtnMobile').addEventListener('click', exportTemplate);
+        });
+        
+        // Update preview
+        function updatePreview() {
+            const html = document.getElementById('htmlCode').value;
+            const css = document.getElementById('cssCode').value;
+            const js = document.getElementById('jsCode').value;
+            
+            const previewContent = `<!DOCTYPE html><html><head><style>${css}</style></head><body>${html}<script>${js}<\/script></body></html>`;
+            document.getElementById('previewFrame').srcdoc = previewContent;
+        }
+        
+        function updateMobilePreview() {
+            const html = document.getElementById('htmlCode').value;
+            const css = document.getElementById('cssCode').value;
+            const js = document.getElementById('jsCode').value;
+            
+            const previewContent = `<!DOCTYPE html><html><head><style>${css}</style></head><body>${html}<script>${js}<\/script></body></html>`;
+            document.getElementById('previewFrameMobile').srcdoc = previewContent;
+        }
+        
+        // Export template
+        function exportTemplate() {
+            const html = document.getElementById('htmlCode').value;
+            const css = document.getElementById('cssCode').value;
+            const js = document.getElementById('jsCode').value;
+            
+            const fullTemplate = `<!DOCTYPE html><html><head><style>${css}</style></head><body>${html}<script>${js}<\/script></body></html>`;
+            
+            const blob = new Blob([fullTemplate], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'template.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Save template
+        async function saveTemplate() {
+            const templateData = {
+                name: document.getElementById('templateNameInput').value,
+                description: document.getElementById('templateDescription').value,
+                html_content: document.getElementById('htmlCode').value,
+                css_content: document.getElementById('cssCode').value,
+                js_content: document.getElementById('jsCode').value,
+                music_url: document.getElementById('musicUrl').value
+            };
+            
+            try {
+                const url = currentTemplate ? `/api/templates/${currentTemplate.id}/update/` : '/api/templates/create/';
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(templateData)
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    alert('Template saved successfully!');
+                    if (result.template_id && !currentTemplate) {
+                        window.location.href = `/editor/${result.template_id}/`;
+                    }
+                } else {
+                    alert('Error: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error saving template. Please try again.');
+            }
+        }
+        
+        // Quick insert functions
+        function insertMusicPlayer() {
+            const code = `<audio controls autoplay loop><source src="{{ event.music_url }}" type="audio/mpeg"></audio>`;
+            insertAtCursor('htmlCode', code);
+        }
+        
+        function insertCountdown() {
+            const code = `<div id="countdown"></div><script>setInterval(()=>{const d=new Date('{{ event.reception_date }}').getTime()-new Date().getTime();document.getElementById('countdown').innerHTML=Math.floor(d/86400000)+' days';},1000);<\/script>`;
+            insertAtCursor('htmlCode', code);
+        }
+        
+        function insertRSVPForm() {
+            const code = `<form><input type="text" placeholder="Your Name" required><button type="submit">RSVP</button></form>`;
+            insertAtCursor('htmlCode', code);
+        }
+        
+        function insertAtCursor(elementId, text) {
+            const element = document.getElementById(elementId);
+            const start = element.selectionStart;
+            const end = element.selectionEnd;
+            element.value = element.value.substring(0, start) + text + element.value.substring(end);
+            element.focus();
+            element.setSelectionRange(start + text.length, start + text.length);
+            updatePreview();
+        }
+        
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // AI Generation Functions
+        async function generateWithAI(type) {
+            const prompt = document.getElementById('aiPrompt').value;
+            if (!prompt.trim()) {
+                showNotification('Please enter a description for your invitation', 'error');
+                return;
+            }
+
+            const button = document.getElementById(`generate${type}Btn`);
+            const originalText = button.innerHTML;
+            
+            // Show loading state with animation
+            button.innerHTML = '<div class="flex items-center"><div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>Generating...</div>';
+            button.disabled = true;
+            button.classList.add('opacity-75');
+
+            try {
+                // Show AI thinking animation
+                showAIThinking();
+                
+                // Simulate AI generation (replace with actual Gemini API call)
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                
+                let generatedCode = '';
+                
+                if (type === 'Html') {
+                    generatedCode = generateAdvancedHTML(prompt);
+                    document.getElementById('htmlCode').value = generatedCode;
+                    showTab('htmlTab');
+                } else if (type === 'Css') {
+                    generatedCode = generateAdvancedCSS(prompt);
+                    document.getElementById('cssCode').value = generatedCode;
+                    showTab('cssTab');
+                } else if (type === 'Full') {
+                    const htmlCode = generateAdvancedHTML(prompt);
+                    const cssCode = generateAdvancedCSS(prompt);
+                    const jsCode = generateAdvancedJS();
+                    
+                    document.getElementById('htmlCode').value = htmlCode;
+                    document.getElementById('cssCode').value = cssCode;
+                    document.getElementById('jsCode').value = jsCode;
+                    showTab('htmlTab');
+                }
+                
+                updatePreview();
+                showNotification(`✨ ${type} code generated successfully with AI!`, 'success');
+                
+                // Add sparkle effect
+                addSparkleEffect(button);
+                
+            } catch (error) {
+                console.error('AI Generation error:', error);
+                showNotification('❌ Failed to generate code. Please try again.', 'error');
+            } finally {
+                hideAIThinking();
+                button.innerHTML = originalText;
+                button.disabled = false;
+                button.classList.remove('opacity-75');
+            }
+        }
+        
+        function showTab(tabId) {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.add('hidden'));
+            
+            const targetButton = document.querySelector(`[data-target="${tabId}"]`);
+            if (targetButton) {
+                targetButton.classList.add('active');
+                document.getElementById(tabId).classList.remove('hidden');
+            }
+        }
+        
+        function showAIThinking() {
+            const aiSection = document.querySelector('.bg-gradient-to-br.from-purple-50');
+            aiSection.classList.add('animate-pulse');
+            
+            // Add thinking dots
+            const thinkingDiv = document.createElement('div');
+            thinkingDiv.id = 'aiThinking';
+            thinkingDiv.className = 'text-center text-purple-600 dark:text-purple-400 text-sm mt-2';
+            thinkingDiv.innerHTML = 'AI is thinking<span class="thinking-dots">...</span>';
+            aiSection.appendChild(thinkingDiv);
+        }
+        
+        function hideAIThinking() {
+            const aiSection = document.querySelector('.bg-gradient-to-br.from-purple-50');
+            aiSection.classList.remove('animate-pulse');
+            
+            const thinkingDiv = document.getElementById('aiThinking');
+            if (thinkingDiv) {
+                thinkingDiv.remove();
+            }
+        }
+        
+        function addSparkleEffect(element) {
+            element.classList.add('animate-bounce');
+            setTimeout(() => {
+                element.classList.remove('animate-bounce');
+            }, 1000);
+        }
+        
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all transform translate-x-full ${
+                type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        function generateAdvancedHTML(prompt) {
+            const templates = {
+                romantic: `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wedding Invitation</title>
+</head>
+<body>
+    <div class="invitation-container">
+        <div class="header">
+            <h1 class="couple-names">{{ event.groom_nickname }} & {{ event.bride_nickname }}</h1>
+            <p class="tagline">Together with our families</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="event-details">
+                <h2>Wedding Celebration</h2>
+                <p class="date">{{ event.reception_date }}</p>
+                <p class="venue">{{ event.venue_name }}</p>
+                <p class="address">{{ event.venue_address }}</p>
+            </div>
+            
+            <div class="rsvp-section">
+                <h3>Please Join Us</h3>
+                <button class="rsvp-btn">RSVP</button>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>With love and joy</p>
+        </div>
+    </div>
+    
+    <audio controls autoplay loop>
+        <source src="{{ event.music_url }}" type="audio/mpeg">
+    </audio>
+</body>
+</html>`,
+                elegant: `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wedding Invitation</title>
+</head>
+<body>
+    <div class="elegant-invitation">
+        <div class="ornament top"></div>
+        
+        <div class="content">
+            <h1>{{ event.groom_nickname }} & {{ event.bride_nickname }}</h1>
+            <div class="divider"></div>
+            <p class="invitation-text">Request the pleasure of your company</p>
+            <p class="event-type">Wedding Ceremony</p>
+            <p class="date">{{ event.reception_date }}</p>
+            <p class="venue">{{ event.venue_name }}</p>
+            <div class="divider"></div>
+            <button class="elegant-rsvp">Kindly RSVP</button>
+        </div>
+        
+        <div class="ornament bottom"></div>
+    </div>
+</body>
+</html>`
+            };
+            
+            if (prompt.toLowerCase().includes('elegant')) {
+                return templates.elegant;
+            }
+            return templates.romantic;
+        }
+        
+        function generateAdvancedCSS(prompt) {
+            const styles = {
+                romantic: `body {
+    margin: 0;
+    padding: 20px;
+    font-family: 'Georgia', serif;
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.invitation-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    text-align: center;
+    max-width: 500px;
+    backdrop-filter: blur(10px);
+}
+
+.couple-names {
+    font-size: 2.5em;
+    color: #d63384;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+.tagline {
+    font-style: italic;
+    color: #6c757d;
+    margin-bottom: 30px;
+}
+
+.event-details {
+    margin: 30px 0;
+    padding: 20px;
+    background: rgba(214, 51, 132, 0.1);
+    border-radius: 15px;
+}
+
+.date {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #d63384;
+}
+
+.rsvp-btn {
+    background: linear-gradient(45deg, #d63384, #ff6b9d);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 25px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.rsvp-btn:hover {
+    transform: scale(1.05);
+}
+
+audio {
+    margin-top: 20px;
+    width: 100%;
+}`,
+                elegant: `body {
+    margin: 0;
+    padding: 20px;
+    font-family: 'Times New Roman', serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.elegant-invitation {
+    background: #fff;
+    border: 3px solid #gold;
+    padding: 60px 40px;
+    text-align: center;
+    max-width: 400px;
+    position: relative;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+}
+
+.ornament {
+    height: 20px;
+    background: repeating-linear-gradient(
+        90deg,
+        #gold 0px,
+        #gold 10px,
+        transparent 10px,
+        transparent 20px
+    );
+    margin: 20px 0;
+}
+
+h1 {
+    font-size: 2.2em;
+    color: #333;
+    margin: 20px 0;
+    letter-spacing: 2px;
+}
+
+.divider {
+    width: 100px;
+    height: 2px;
+    background: #gold;
+    margin: 20px auto;
+}
+
+.invitation-text {
+    font-style: italic;
+    color: #666;
+    margin: 15px 0;
+}
+
+.event-type {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #333;
+}
+
+.elegant-rsvp {
+    background: transparent;
+    border: 2px solid #333;
+    padding: 12px 25px;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 20px;
+}
+
+.elegant-rsvp:hover {
+    background: #333;
+    color: white;
+}`
+            };
+            
+            if (prompt.toLowerCase().includes('elegant')) {
+                return styles.elegant;
+            }
+            return styles.romantic;
+        }
+        
+        function generateAdvancedJS() {
+            return `document.addEventListener('DOMContentLoaded', function() {
+    console.log('Wedding invitation loaded!');
+    
+    // Auto-play audio on user interaction
+    const audio = document.querySelector('audio');
+    if (audio) {
+        document.body.addEventListener('click', function() {
+            audio.play().catch(e => console.log('Audio play failed:', e));
+        }, { once: true });
+    }
+    
+    // RSVP button functionality
+    const rsvpBtn = document.querySelector('.rsvp-btn, .elegant-rsvp');
+    if (rsvpBtn) {
+        rsvpBtn.addEventListener('click', function() {
+            alert('Thank you for your RSVP! We look forward to celebrating with you.');
+        });
+    }
+    
+    // Add entrance animation
+    const container = document.querySelector('.invitation-container, .elegant-invitation');
+    if (container) {
+        container.style.opacity = '0';
+        container.style.transform = 'translateY(50px)';
+        
+        setTimeout(() => {
+            container.style.transition = 'all 1s ease';
+            container.style.opacity = '1';
+            container.style.transform = 'translateY(0)';
+        }, 100);
+    }
+});`;
+        }
+        
+        // Initialize AI generation buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('generateHtmlBtn').addEventListener('click', () => generateWithAI('Html'));
+            document.getElementById('generateCssBtn').addEventListener('click', () => generateWithAI('Css'));
+            document.getElementById('generateFullBtn').addEventListener('click', () => generateWithAI('Full'));
+        });
+    </script>
+    
+    <style>
+        /* Tab styling */
+        .tab-button {
+            @apply text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white;
+        }
+        .tab-button.active {
+            @apply bg-primary text-white;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            .code-editor {
+                height: 250px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .code-editor {
+                height: 200px;
+            }
+        }
+    </style>
+</body>
+</html>

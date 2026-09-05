@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Buat Undangan Baru - Wedding Invitation Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#667eea',
+                        secondary: '#764ba2'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .template-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .template-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+        
+        .template-card.selected {
+            border: 3px solid #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .file-upload {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .file-upload:hover {
+            border-color: #667eea;
+            background: #f8fafc;
+        }
+        
+        .preview-image {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 16px;
+            }
+            
+            .template-card {
+                margin-bottom: 16px;
+            }
+            
+            .btn-primary {
+                width: 100%;
+                padding: 16px;
+                font-size: 18px;
+            }
+            
+            .form-input {
+                font-size: 16px;
+                padding: 14px 16px;
+            }
+        }
+        }
+        .social-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .instagram { background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); }
+        .facebook { background: #1877f2; }
+        .twitter { background: #1da1f2; }
+        .youtube { background: #ff0000; }
+        .tiktok { background: #000000; }
+        .whatsapp { background: #25d366; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white py-4 md:py-6">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <a href="javascript:history.back()" class="text-white hover:text-gray-200 transition-colors">
+                        <i class="fas fa-arrow-left text-lg md:text-xl"></i>
+                    </a>
+                    <div>
+                        <h1 class="text-xl md:text-3xl font-bold">Buat Undangan Baru</h1>
+                        <p class="text-sm md:text-lg opacity-90 hidden md:block">Pilih template dan isi data undangan</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a href="{% url 'template_editor:my_invitations' %}" class="bg-white bg-opacity-20 text-white px-3 py-2 md:px-4 rounded-lg hover:bg-opacity-30 transition-colors text-sm md:text-base">
+                        <i class="fas fa-list mr-1 md:mr-2"></i><span class="hidden md:inline">Undangan Saya</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-6 md:py-8 max-w-4xl">
+        <!-- Template Selection -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-palette mr-3 text-primary"></i>
+                Pilih Template
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="templateGrid">
+                <!-- Template cards will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Form Section -->
+        <form id="invitationForm" method="post" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            <input type="hidden" name="template_id" id="selectedTemplateId" value="">
+            
+            <!-- Basic Information -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-lg md:text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-info-circle mr-3 text-primary"></i>
+                    Informasi Dasar
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Judul Undangan *</label>
+                        <input type="text" name="judul" class="form-input" placeholder="Contoh: Pernikahan John & Jane" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">URL Undangan *</label>
+                        <input type="text" name="slug" class="form-input" placeholder="john-jane-wedding" required>
+                        <p class="text-xs text-gray-500 mt-1">Hanya huruf kecil, angka, dan tanda hubung</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Couple Information -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-lg md:text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-heart mr-3 text-primary"></i>
+                    Data Mempelai
+                </h3>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Mempelai Pria -->
+                    <div class="space-y-4">
+                        <h4 class="font-semibold text-gray-700 flex items-center">
+                            <i class="fas fa-male mr-2 text-blue-600"></i>
+                            Mempelai Pria
+                        </h4>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Panggilan *</label>
+                            <input type="text" name="nama_panggilan_pria" class="form-input" placeholder="John" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap *</label>
+                            <input type="text" name="nama_lengkap_pria" class="form-input" placeholder="John Smith" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Info Orang Tua</label>
+                            <input type="text" name="info_orang_tua_pria" class="form-input" placeholder="Putra dari Bapak Robert & Ibu Mary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Foto Mempelai Pria</label>
+                            <div class="file-upload" onclick="document.getElementById('foto_pria').click()">
+                                <i class="fas fa-camera text-2xl text-gray-400 mb-2"></i>
+                                <p class="text-sm text-gray-600">Klik untuk upload foto</p>
+                                <input type="file" id="foto_pria" name="foto_pria" accept="image/*" class="hidden" onchange="previewImage(this, 'preview_pria')">
+                            </div>
+                            <img id="preview_pria" class="preview-image mt-2 hidden">
+                        </div>
+                    </div>
+                    
+                    <!-- Mempelai Wanita -->
+                    <div class="space-y-4">
+                        <h4 class="font-semibold text-gray-700 flex items-center">
+                            <i class="fas fa-female mr-2 text-pink-600"></i>
+                            Mempelai Wanita
+                        </h4>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Panggilan *</label>
+                            <input type="text" name="nama_panggilan_wanita" class="form-input" placeholder="Jane" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap *</label>
+                            <input type="text" name="nama_lengkap_wanita" class="form-input" placeholder="Jane Doe" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Info Orang Tua</label>
+                            <input type="text" name="info_orang_tua_wanita" class="form-input" placeholder="Putri dari Bapak Michael & Ibu Sarah">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Foto Mempelai Wanita</label>
+                            <div class="file-upload" onclick="document.getElementById('foto_wanita').click()">
+                                <i class="fas fa-camera text-2xl text-gray-400 mb-2"></i>
+                                <p class="text-sm text-gray-600">Klik untuk upload foto</p>
+                                <input type="file" id="foto_wanita" name="foto_wanita" accept="image/*" class="hidden" onchange="previewImage(this, 'preview_wanita')">
+                            </div>
+                            <img id="preview_wanita" class="preview-image mt-2 hidden">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Event Details -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-lg md:text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-calendar-alt mr-3 text-primary"></i>
+                    Detail Acara
+                </h3>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Acara 1 -->
+                    <div class="space-y-4">
+                        <h4 class="font-semibold text-gray-700">Akad Nikah / Pemberkatan</h4>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal & Waktu</label>
+                            <input type="datetime-local" name="tanggal_waktu_acara_1" class="form-input">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lokasi</label>
+                            <input type="text" name="nama_lokasi_acara_1" class="form-input" placeholder="Masjid Al-Ikhlas">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Alamat Lengkap</label>
+                            <textarea name="alamat_lokasi_acara_1" rows="3" class="form-input" placeholder="Jl. Contoh No. 123, Jakarta"></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Acara 2 -->
+                    <div class="space-y-4">
+                        <h4 class="font-semibold text-gray-700">Resepsi</h4>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal & Waktu</label>
+                            <input type="datetime-local" name="tanggal_waktu_acara_2" class="form-input">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lokasi</label>
+                            <input type="text" name="nama_lokasi_acara_2" class="form-input" placeholder="Gedung Serbaguna">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Alamat Lengkap</label>
+                            <textarea name="alamat_lokasi_acara_2" rows="3" class="form-input" placeholder="Jl. Contoh No. 456, Jakarta"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Content -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-lg md:text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-quote-left mr-3 text-primary"></i>
+                    Konten Tambahan
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kutipan Pembuka</label>
+                        <textarea name="kutipan_pembuka" rows="3" class="form-input" placeholder="Kutipan atau ayat yang bermakna..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Teks Penutup</label>
+                        <textarea name="teks_penutup" rows="3" class="form-input" placeholder="Ucapan terima kasih..."></textarea>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Foto Cover</label>
+                    <div class="file-upload" onclick="document.getElementById('foto_cover').click()">
+                        <i class="fas fa-image text-2xl text-gray-400 mb-2"></i>
+                        <p class="text-sm text-gray-600">Klik untuk upload foto cover</p>
+                        <input type="file" id="foto_cover" name="foto_cover" accept="image/*" class="hidden" onchange="previewImage(this, 'preview_cover')">
+                    </div>
+                    <img id="preview_cover" class="preview-image mt-2 hidden">
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="text-center">
+                <button type="submit" id="submitBtn" class="btn-primary" disabled>
+                    <i class="fas fa-save mr-2"></i>
+                    Buat Undangan
+                </button>
+            </div>
+        </form>
+    </div>
+    <!-- JavaScript for template selection and form handling -->
+    <script>
+        // Load templates
+        async function loadTemplates() {
+            try {
+                const response = await fetch('/api/templates/');
+                const templates = await response.json();
+                const grid = document.getElementById('templateGrid');
+                
+                templates.forEach(template => {
+                    const card = document.createElement('div');
+                    card.className = 'template-card';
+                    card.onclick = () => selectTemplate(template.id, card);
+                    
+                    card.innerHTML = `
+                        <img src="${template.preview_image || '/static/images/default-template.jpg'}" 
+                             alt="${template.name}" class="w-full h-32 object-cover">
+                        <div class="p-3">
+                            <h4 class="font-semibold text-gray-800 text-sm">${template.name}</h4>
+                            <p class="text-xs text-gray-600 mt-1">${template.category}</p>
+                        </div>
+                    `;
+                    
+                    grid.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error loading templates:', error);
+            }
+        }
+        
+        function selectTemplate(templateId, cardElement) {
+            // Remove previous selection
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Select current template
+            cardElement.classList.add('selected');
+            document.getElementById('selectedTemplateId').value = templateId;
+            
+            // Enable submit button
+            document.getElementById('submitBtn').disabled = false;
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTemplates();
+        });
+    </script>
+
+    <script>
+        function previewImage(input, previewId) {
+            const file = input.files[0];
+            const preview = document.getElementById(previewId);
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg text-white font-medium transition-all duration-300 transform translate-x-full`;
+            
+            switch(type) {
+                case 'success':
+                    notification.classList.add('bg-green-500');
+                    break;
+                case 'error':
+                    notification.classList.add('bg-red-500');
+                    break;
+                case 'warning':
+                    notification.classList.add('bg-yellow-500');
+                    break;
+                default:
+                    notification.classList.add('bg-blue-500');
+            }
+            
+            notification.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
+        
+        // Auto-generate slug from title
+        document.querySelector('input[name="judul"]').addEventListener('input', function() {
+            const title = this.value;
+            const slug = title.toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .trim('-');
+            document.querySelector('input[name="slug"]').value = slug;
+        });
+        
+        // Form submission
+        document.getElementById('invitationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validate required fields
+            const requiredFields = this.querySelectorAll('[required]');
+            for (let field of requiredFields) {
+                if (!field.value.trim()) {
+                    field.focus();
+                    field.classList.add('border-red-500');
+                    showNotification('Please fill all required fields', 'error');
+                    return;
+                }
+                field.classList.remove('border-red-500');
+            }
+            
+            // Check if template is selected
+            if (!document.getElementById('selectedTemplateId').value) {
+                showNotification('Please select a template', 'error');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating...';
+            submitBtn.disabled = true;
+            
+            // Submit form
+            const formData = new FormData(this);
+            
+            fetch(this.action || window.location.href, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Network response was not ok');
+                }
+            })
+            .then(data => {
+                if (data.success) {
+                    showNotification('Invitation created successfully!', 'success');
+                    if (data.redirect) {
+                        setTimeout(() => {
+                            window.location.href = data.redirect;
+                        }, 1500);
+                    }
+                } else {
+                    showNotification(data.message || 'Error creating invitation', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error creating invitation', 'error');
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+        });
+    </script>
+</body>
+</html>

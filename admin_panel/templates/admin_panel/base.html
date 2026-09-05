@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel{% endblock %} - Wedding Invitation Platform</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <style>
+        .sidebar-transition {
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .modal-backdrop {
+            backdrop-filter: blur(4px);
+        }
+        
+        .glass-effect {
+            background: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(75, 85, 99, 0.3);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
+    
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed left-0 top-0 z-50 h-full w-64 bg-gray-800 border-r border-gray-700 sidebar-transition transform -translate-x-full lg:translate-x-0">
+        <div class="flex items-center justify-between p-4 border-b border-gray-700">
+            <h2 class="text-xl font-bold text-white">Admin Panel</h2>
+            <button id="close-sidebar" class="lg:hidden text-gray-400 hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <nav class="mt-4">
+            <ul class="space-y-2 px-4">
+                <li>
+                    <a href="{% url 'admin_panel:dashboard' %}" class="flex items-center p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-tachometer-alt mr-3"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'admin_panel:templates_list' %}" class="flex items-center p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-file-alt mr-3"></i>
+                        Templates
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'admin_panel:orders_list' %}" class="flex items-center p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-shopping-cart mr-3"></i>
+                        Orders
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'admin_panel:payment_management' %}" class="flex items-center p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-credit-card mr-3"></i>
+                        Payments
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'admin_panel:users_management' %}" class="flex items-center p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-users mr-3"></i>
+                        Users
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'admin_panel:system_settings' %}" class="flex items-center p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-cog mr-3"></i>
+                        Settings
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'admin_panel:analytics_dashboard' %}" class="flex items-center p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-chart-bar mr-3"></i>
+                        Analytics
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="absolute bottom-4 left-4 right-4">
+            <button onclick="logout()" class="w-full flex items-center justify-center p-3 bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
+                <i class="fas fa-sign-out-alt mr-2"></i>
+                Logout
+            </button>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <div class="lg:ml-64">
+        <!-- Top Navigation -->
+        <header class="bg-gray-800 border-b border-gray-700 px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <button id="menu-toggle" class="lg:hidden text-gray-400 hover:text-white mr-4">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="text-xl font-semibold">{% block page_title %}Dashboard{% endblock %}</h1>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <!-- Notifications -->
+                    <button class="relative text-gray-400 hover:text-white" onclick="toggleNotifications()">
+                        <i class="fas fa-bell"></i>
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-xs rounded-full h-4 w-4 flex items-center justify-center">3</span>
+                    </button>
+                    
+                    <!-- User Menu -->
+                    <div class="relative">
+                        <button class="flex items-center space-x-2 text-gray-400 hover:text-white" onclick="toggleUserMenu()">
+                            <img src="https://ui-avatars.com/api/?name=Admin&background=3b82f6&color=fff" alt="Admin" class="w-8 h-8 rounded-full">
+                            <span>Admin</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        
+                        <div id="user-menu" class="hidden absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg border border-gray-700">
+                            <a href="#" class="block px-4 py-2 hover:bg-gray-700 rounded-t-lg">Profile</a>
+                            <a href="#" class="block px-4 py-2 hover:bg-gray-700">Settings</a>
+                            <hr class="border-gray-700">
+                            <a href="#" onclick="logout()" class="block px-4 py-2 hover:bg-gray-700 rounded-b-lg text-red-400">Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Page Content -->
+        <main class="p-6">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    
+    <!-- Notification Panel -->
+    <div id="notification-panel" class="hidden fixed right-4 top-16 w-80 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-50">
+        <div class="p-4 border-b border-gray-700">
+            <h3 class="font-semibold">Notifications</h3>
+        </div>
+        <div class="p-4 space-y-3">
+            <div class="flex items-start space-x-3">
+                <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                <div>
+                    <p class="text-sm">New order received</p>
+                    <p class="text-xs text-gray-400">2 minutes ago</p>
+                </div>
+            </div>
+            <div class="flex items-start space-x-3">
+                <div class="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                <div>
+                    <p class="text-sm">Payment confirmed</p>
+                    <p class="text-xs text-gray-400">5 minutes ago</p>
+                </div>
+            </div>
+            <div class="flex items-start space-x-3">
+                <div class="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                <div>
+                    <p class="text-sm">Template updated</p>
+                    <p class="text-xs text-gray-400">10 minutes ago</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script>
+        // Mobile menu toggle
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            sidebar.classList.remove('-translate-x-full');
+            overlay.classList.remove('hidden');
+        });
+        
+        document.getElementById('close-sidebar').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+        });
+        
+        document.getElementById('mobile-overlay').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+        });
+        
+        // User menu toggle
+        function toggleUserMenu() {
+            const menu = document.getElementById('user-menu');
+            menu.classList.toggle('hidden');
+        }
+        
+        // Notifications toggle
+        function toggleNotifications() {
+            const panel = document.getElementById('notification-panel');
+            panel.classList.toggle('hidden');
+        }
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('user-menu');
+            const notificationPanel = document.getElementById('notification-panel');
+            
+            if (!event.target.closest('[onclick="toggleUserMenu()"]') && !userMenu.classList.contains('hidden')) {
+                userMenu.classList.add('hidden');
+            }
+            
+            if (!event.target.closest('[onclick="toggleNotifications()"]') && !notificationPanel.classList.contains('hidden')) {
+                notificationPanel.classList.add('hidden');
+            }
+        });
+        
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '{% url "admin_panel:logout" %}';
+            }
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

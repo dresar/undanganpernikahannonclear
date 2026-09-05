@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Undangan Pernikahan</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <style>
+        .font-dancing { font-family: 'Dancing Script', cursive; }
+        .font-great-vibes { font-family: 'Great Vibes', cursive; }
+        .font-poppins { font-family: 'Poppins', sans-serif; }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .bg-gradient-wedding {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+        
+        .bg-gradient-gold {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card-shadow {
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .invitation-card {
+            transition: all 0.3s ease;
+        }
+        
+        .invitation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        .status-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="font-poppins bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="font-great-vibes text-5xl font-bold mb-2">Dashboard Undangan Pernikahan</h1>
+                    <p class="text-xl opacity-90">Kelola semua undangan pernikahan Anda dengan mudah</p>
+                </div>
+                <div class="flex gap-4">
+                    <a href="javascript:history.back()" class="bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Kembali
+                    </a>
+                    <a href="{% url 'template_editor:create_undangan' %}" class="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>Buat Undangan Baru
+                    </a>
+                    <a href="{% url 'template_editor:gallery' %}" class="bg-gradient-gold text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                        <i class="fas fa-images mr-2"></i>Galeri Template
+                    </a>
+                    <a href="{% url 'template_editor:editor' %}" class="bg-purple-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-900 transition-colors">
+                        <i class="fas fa-code mr-2"></i>Editor Template
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Stats Cards -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8" data-aos="fade-up">
+            <div class="stats-card text-white p-6 rounded-xl card-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-lg opacity-90">Total Undangan</p>
+                        <p class="text-3xl font-bold">{{ total_undangan|default:0 }}</p>
+                    </div>
+                    <i class="fas fa-heart text-4xl opacity-80 floating"></i>
+                </div>
+            </div>
+            <div class="bg-green-500 text-white p-6 rounded-xl card-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-lg opacity-90">Dipublikasi</p>
+                        <p class="text-3xl font-bold">{{ published_count|default:0 }}</p>
+                    </div>
+                    <i class="fas fa-check-circle text-4xl opacity-80 floating" style="animation-delay: 0.5s;"></i>
+                </div>
+            </div>
+            <div class="bg-yellow-500 text-white p-6 rounded-xl card-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-lg opacity-90">Draft</p>
+                        <p class="text-3xl font-bold">{{ draft_count|default:0 }}</p>
+                    </div>
+                    <i class="fas fa-edit text-4xl opacity-80 floating" style="animation-delay: 1s;"></i>
+                </div>
+            </div>
+            <div class="bg-blue-500 text-white p-6 rounded-xl card-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-lg opacity-90">Total Views</p>
+                        <p class="text-3xl font-bold">{{ total_views|default:0 }}</p>
+                    </div>
+                    <i class="fas fa-eye text-4xl opacity-80 floating" style="animation-delay: 1.5s;"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-xl card-shadow p-6 mb-8" data-aos="fade-up" data-aos-delay="200">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Aksi Cepat</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <a href="{% url 'template_editor:create_undangan' %}" class="card-hover bg-purple-50 border-2 border-purple-200 p-6 rounded-lg text-center hover:bg-purple-100">
+                    <i class="fas fa-plus-circle text-4xl text-purple-600 mb-3"></i>
+                    <h3 class="text-lg font-semibold text-purple-800">Buat Undangan Baru</h3>
+                    <p class="text-purple-600">Pilih dari template cantik kami</p>
+                </a>
+                <a href="{% url 'template_editor:my_invitations' %}" class="card-hover bg-blue-50 border-2 border-blue-200 p-6 rounded-lg text-center hover:bg-blue-100">
+                    <i class="fas fa-list text-4xl text-blue-600 mb-3"></i>
+                    <h3 class="text-lg font-semibold text-blue-800">Kelola Undangan</h3>
+                    <p class="text-blue-600">Lihat dan kelola undangan Anda</p>
+                </a>
+                <a href="{% url 'template_editor:gallery' %}" class="card-hover bg-pink-50 border-2 border-pink-200 p-6 rounded-lg text-center hover:bg-pink-100">
+                    <i class="fas fa-images text-4xl text-pink-600 mb-3"></i>
+                    <h3 class="text-lg font-semibold text-pink-800">Galeri Template</h3>
+                    <p class="text-pink-600">Jelajahi koleksi template</p>
+                </a>
+                <a href="{% url 'template_editor:editor' %}" class="card-hover bg-green-50 border-2 border-green-200 p-6 rounded-lg text-center hover:bg-green-100">
+                    <i class="fas fa-code text-4xl text-green-600 mb-3"></i>
+                    <h3 class="text-lg font-semibold text-green-800">Editor Template</h3>
+                    <p class="text-green-600">Buat template kustom</p>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Filters and Search -->
+        <div class="bg-white rounded-2xl p-6 card-shadow mb-8" data-aos="fade-up" data-aos-delay="300">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                    <div class="relative">
+                        <input type="text" id="searchInput" placeholder="Cari undangan..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent w-full sm:w-64">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    </div>
+                    
+                    <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                        <option value="">Semua Status</option>
+                        <option value="published">Dipublikasi</option>
+                        <option value="draft">Draft</option>
+                    </select>
+                    
+                    <select id="sortBy" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                        <option value="-created_at">Terbaru</option>
+                        <option value="created_at">Terlama</option>
+                        <option value="wedding_date">Tanggal Pernikahan</option>
+                        <option value="bride_name">Nama Mempelai</option>
+                    </select>
+                </div>
+                
+                <div class="flex items-center space-x-2">
+                    <button id="gridView" class="p-2 rounded-lg bg-pink-100 text-pink-600">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                    <button id="listView" class="p-2 rounded-lg text-gray-400 hover:bg-gray-100">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Undangan Grid -->
+        {% if undangan_list %}
+        <div id="undanganGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for undangan in undangan_list %}
+            <div class="invitation-card bg-white rounded-2xl overflow-hidden card-shadow relative" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}" data-status="{% if undangan.is_published %}published{% else %}draft{% endif %}" data-name="{{ undangan.nama_panggilan_wanita }} {{ undangan.nama_panggilan_pria }}" data-date="{{ undangan.tanggal_waktu_acara_1|date:'Y-m-d' }}">
+                
+                <!-- Status Badge -->
+                <div class="status-badge">
+                    {% if undangan.is_published %}
+                        <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                            <i class="fas fa-check-circle mr-1"></i>Published
+                        </span>
+                    {% else %}
+                        <span class="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                            <i class="fas fa-clock mr-1"></i>Draft
+                        </span>
+                    {% endif %}
+                </div>
+                
+                <!-- Card Header -->
+                <div class="bg-gradient-wedding p-6 text-center relative overflow-hidden">
+                    <!-- Background Decoration -->
+                    <div class="absolute inset-0 opacity-20">
+                        <div class="absolute top-2 left-2 w-8 h-8 bg-white rounded-full floating"></div>
+                        <div class="absolute bottom-2 right-2 w-6 h-6 bg-white rounded-full floating" style="animation-delay: 1s;"></div>
+                    </div>
+                    
+                    <div class="relative z-10">
+                        {% if undangan.foto_cover %}
+                            <img src="{{ undangan.foto_cover.url }}" alt="{{ undangan.nama_panggilan_wanita }} & {{ undangan.nama_panggilan_pria }}" class="w-20 h-20 object-cover rounded-full mx-auto mb-4 border-4 border-white">
+                        {% else %}
+                            <div class="w-20 h-20 bg-white bg-opacity-30 rounded-full mx-auto mb-4 flex items-center justify-center">
+                                <i class="fas fa-heart text-2xl text-white"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <h3 class="font-great-vibes text-2xl text-white mb-1">{{ undangan.nama_panggilan_wanita }}</h3>
+                        <div class="text-white font-dancing text-lg mb-1">&</div>
+                        <h3 class="font-great-vibes text-2xl text-white">{{ undangan.nama_panggilan_pria }}</h3>
+                    </div>
+                </div>
+                
+                <!-- Card Body -->
+                <div class="p-6">
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center text-gray-600">
+                            <i class="fas fa-calendar mr-3 text-pink-500"></i>
+                            <span>{{ undangan.tanggal_waktu_acara_1|date:"d F Y" }}</span>
+                        </div>
+                        
+                        {% if undangan.nama_lokasi_acara_1 %}
+                        <div class="flex items-center text-gray-600">
+                            <i class="fas fa-map-marker-alt mr-3 text-pink-500"></i>
+                            <span class="truncate">{{ undangan.nama_lokasi_acara_1 }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="flex items-center text-gray-600">
+                            <i class="fas fa-eye mr-3 text-pink-500"></i>
+                            <span>{{ undangan.view_count|default:0 }} views</span>
+                        </div>
+                        
+                        <div class="flex items-center text-gray-600">
+                            <i class="fas fa-comments mr-3 text-pink-500"></i>
+                            <span>{{ undangan.guest_comments.count }} ucapan</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex space-x-2">
+                        <a href="{% url 'template_editor:undangan_detail' undangan.slug %}" target="_blank" class="flex-1 bg-blue-500 text-white text-center py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm">
+                            <i class="fas fa-eye mr-1"></i>Lihat
+                        </a>
+                        
+                        <a href="{% url 'template_editor:edit_undangan' undangan.slug %}" class="flex-1 bg-gray-500 text-white text-center py-2 rounded-lg hover:bg-gray-600 transition-colors text-sm">
+                            <i class="fas fa-edit mr-1"></i>Edit
+                        </a>
+                        
+                        <button onclick="togglePublish('{{ undangan.slug }}', {{ undangan.is_published|yesno:'true,false' }})" class="flex-1 {% if undangan.is_published %}bg-yellow-500 hover:bg-yellow-600{% else %}bg-green-500 hover:bg-green-600{% endif %} text-white py-2 rounded-lg transition-colors text-sm">
+                            {% if undangan.is_published %}
+                                <i class="fas fa-pause mr-1"></i>Nonaktif
+                            {% else %}
+                                <i class="fas fa-play mr-1"></i>Aktifkan
+                            {% endif %}
+                        </button>
+                    </div>
+                    
+                    <!-- Additional Actions -->
+                    <div class="mt-3 flex justify-between items-center">
+                        <div class="flex space-x-2">
+                            <button onclick="shareUndangan('{{ undangan.slug }}')" class="text-gray-500 hover:text-blue-500 transition-colors" title="Share">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                            
+                            <button onclick="copyLink('{{ undangan.slug }}')" class="text-gray-500 hover:text-green-500 transition-colors" title="Copy Link">
+                                <i class="fas fa-link"></i>
+                            </button>
+                            
+                            <a href="{% url 'template_editor:export_undangan' undangan.slug 'html' %}" class="text-gray-500 hover:text-purple-500 transition-colors" title="Export">
+                                <i class="fas fa-download"></i>
+                            </a>
+                        </div>
+                        
+                        <div class="text-xs text-gray-400">
+                            Dibuat {{ undangan.created_at|timesince }} lalu
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- List View (Hidden by default) -->
+        <div id="undanganList" class="hidden space-y-4">
+            {% for undangan in undangan_list %}
+            <div class="bg-white rounded-xl p-6 card-shadow flex items-center justify-between" data-status="{% if undangan.is_published %}published{% else %}draft{% endif %}" data-name="{{ undangan.nama_panggilan_wanita }} {{ undangan.nama_panggilan_pria }}" data-date="{{ undangan.tanggal_waktu_acara_1|date:'Y-m-d' }}">
+                <div class="flex items-center space-x-4">
+                    {% if undangan.foto_cover %}
+                        <img src="{{ undangan.foto_cover.url }}" alt="{{ undangan.nama_panggilan_wanita }} & {{ undangan.nama_panggilan_pria }}" class="w-16 h-16 object-cover rounded-full">
+                    {% else %}
+                        <div class="w-16 h-16 bg-gradient-wedding rounded-full flex items-center justify-center">
+                            <i class="fas fa-heart text-white text-xl"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <div>
+                        <h3 class="font-semibold text-lg text-gray-800">{{ undangan.nama_panggilan_wanita }} & {{ undangan.nama_panggilan_pria }}</h3>
+                        <div class="flex items-center space-x-4 text-sm text-gray-600">
+                            <span><i class="fas fa-calendar mr-1"></i>{{ undangan.tanggal_waktu_acara_1|date:"d M Y" }}</span>
+                            {% if undangan.nama_lokasi_acara_1 %}
+                                <span><i class="fas fa-map-marker-alt mr-1"></i>{{ undangan.nama_lokasi_acara_1|truncatechars:30 }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-3">
+                    {% if undangan.is_published %}
+                        <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-medium">
+                            <i class="fas fa-check-circle mr-1"></i>Published
+                        </span>
+                    {% else %}
+                        <span class="bg-yellow-100 text-yellow-600 px-3 py-1 rounded-full text-sm font-medium">
+                            <i class="fas fa-clock mr-1"></i>Draft
+                        </span>
+                    {% endif %}
+                    
+                    <div class="flex space-x-2">
+                        <a href="{% url 'template_editor:undangan_detail' undangan.slug %}" target="_blank" class="text-blue-500 hover:text-blue-600 p-2" title="Lihat">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{% url 'template_editor:edit_undangan' undangan.slug %}" class="text-gray-500 hover:text-gray-600 p-2" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button onclick="togglePublish('{{ undangan.slug }}', {{ undangan.is_published|yesno:'true,false' }})" class="{% if undangan.is_published %}text-yellow-500 hover:text-yellow-600{% else %}text-green-500 hover:text-green-600{% endif %} p-2" title="{% if undangan.is_published %}Nonaktifkan{% else %}Aktifkan{% endif %}">
+                            {% if undangan.is_published %}
+                                <i class="fas fa-pause"></i>
+                            {% else %}
+                                <i class="fas fa-play"></i>
+                            {% endif %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="mt-12 flex justify-center">
+            <nav class="flex items-center space-x-2">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1" class="px-3 py-2 rounded-lg bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                    <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 rounded-lg bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <span class="px-4 py-2 rounded-lg bg-pink-500 text-white font-medium">{{ num }}</span>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <a href="?page={{ num }}" class="px-4 py-2 rounded-lg bg-white text-gray-600 hover:bg-gray-50 transition-colors">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 rounded-lg bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}" class="px-3 py-2 rounded-lg bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-16" data-aos="fade-up">
+            <div class="bg-white rounded-2xl p-12 card-shadow max-w-md mx-auto">
+                <div class="mb-6">
+                    <i class="fas fa-heart text-6xl text-gray-300"></i>
+                </div>
+                <h3 class="font-dancing text-3xl text-gray-800 mb-4">Belum Ada Undangan</h3>
+                <p class="text-gray-600 mb-8">Mulai buat undangan pernikahan pertama Anda yang cantik dan berkesan.</p>
+                <a href="{% url 'template_editor:create_undangan' %}" class="bg-gradient-gold text-white px-8 py-3 rounded-lg hover:opacity-90 transition-opacity inline-flex items-center">
+                    <i class="fas fa-plus mr-2"></i>
+                    Buat Undangan Pertama
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 1000,
+            once: true
+        });
+        
+        // View Toggle
+        const gridView = document.getElementById('gridView');
+        const listView = document.getElementById('listView');
+        const undanganGrid = document.getElementById('undanganGrid');
+        const undanganList = document.getElementById('undanganList');
+        
+        if (gridView && listView && undanganGrid && undanganList) {
+            gridView.addEventListener('click', function() {
+                undanganGrid.classList.remove('hidden');
+                undanganList.classList.add('hidden');
+                gridView.classList.add('bg-pink-100', 'text-pink-600');
+                gridView.classList.remove('text-gray-400');
+                listView.classList.remove('bg-pink-100', 'text-pink-600');
+                listView.classList.add('text-gray-400');
+            });
+            
+            listView.addEventListener('click', function() {
+                undanganGrid.classList.add('hidden');
+                undanganList.classList.remove('hidden');
+                listView.classList.add('bg-pink-100', 'text-pink-600');
+                listView.classList.remove('text-gray-400');
+                gridView.classList.remove('bg-pink-100', 'text-pink-600');
+                gridView.classList.add('text-gray-400');
+            });
+        }
+        
+        // Search and Filter
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const sortBy = document.getElementById('sortBy');
+        
+        function filterUndangan() {
+            const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+            const statusValue = statusFilter ? statusFilter.value : '';
+            
+            const cards = document.querySelectorAll('.invitation-card, #undanganList > div');
+            
+            cards.forEach(card => {
+                const name = card.getAttribute('data-name') ? card.getAttribute('data-name').toLowerCase() : '';
+                const status = card.getAttribute('data-status') || '';
+                
+                const matchesSearch = name.includes(searchTerm);
+                const matchesStatus = !statusValue || status === statusValue;
+                
+                if (matchesSearch && matchesStatus) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+        
+        if (searchInput) searchInput.addEventListener('input', filterUndangan);
+        if (statusFilter) statusFilter.addEventListener('change', filterUndangan);
+        
+        // Toggle Publish Status
+        function togglePublish(slug, currentStatus) {
+            const action = currentStatus ? 'nonaktifkan' : 'aktifkan';
+            
+            if (confirm(`Apakah Anda yakin ingin ${action} undangan ini?`)) {
+                fetch(`/template_editor/undangan/publish/${slug}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Terjadi kesalahan. Silakan coba lagi.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan. Silakan coba lagi.');
+                });
+            }
+        }
+        
+        // Share Undangan
+        function shareUndangan(slug) {
+            const url = `${window.location.origin}/template_editor/undangan/${slug}/`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Undangan Pernikahan',
+                    text: 'Lihat undangan pernikahan kami',
+                    url: url
+                });
+            } else {
+                copyToClipboard(url);
+                alert('Link undangan berhasil disalin!');
+            }
+        }
+        
+        // Copy Link
+        function copyLink(slug) {
+            const url = `${window.location.origin}/template_editor/undangan/${slug}/`;
+            copyToClipboard(url);
+            alert('Link undangan berhasil disalin!');
+        }
+        
+        // Copy to Clipboard Helper
+        function copyToClipboard(text) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(function() {
+                    // Success
+                }, function(err) {
+                    // Fallback
+                    fallbackCopyTextToClipboard(text);
+                });
+            } else {
+                fallbackCopyTextToClipboard(text);
+            }
+        }
+        
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+        }
+        
+        // Add CSRF token to all AJAX requests
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (!csrfToken) {
+            // Create CSRF token element if it doesn't exist
+            const token = document.createElement('input');
+            token.type = 'hidden';
+            token.name = 'csrfmiddlewaretoken';
+            token.value = '{{ csrf_token }}';
+            document.body.appendChild(token);
+        }
+    </script>
+</body>
+</html>

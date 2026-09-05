@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Invitations - Wedding Invitation Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .filter-btn {
+            transition: all 0.2s ease;
+        }
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .invitation-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .invitation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-published {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        .status-draft {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        .action-btn {
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+        .btn-edit {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .btn-view {
+            background-color: #10b981;
+            color: white;
+        }
+        .btn-delete {
+            background-color: #ef4444;
+            color: white;
+        }
+        .btn-publish {
+            background-color: #8b5cf6;
+            color: white;
+        }
+        .search-input {
+            transition: all 0.2s ease;
+        }
+        .search-input:focus {
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-4xl font-bold mb-2">My Invitations</h1>
+                    <p class="text-xl opacity-90">Manage all your wedding invitations</p>
+                </div>
+                <div class="flex gap-3">
+                    <a href="javascript:history.back()" class="bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Kembali
+                    </a>
+                    <a href="{% url 'template_editor:create_invitation' %}" class="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>Create New
+                    </a>
+                    <a href="{% url 'template_editor:editor_dashboard' %}" class="bg-purple-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-900 transition-colors">
+                        <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Filters and Search -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <!-- Search -->
+                <div class="flex-1 max-w-md">
+                    <div class="relative">
+                        <input type="text" id="searchInput" placeholder="Search invitations..." 
+                               class="search-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <!-- Filter Buttons -->
+                <div class="flex gap-2">
+                    <button class="filter-btn active px-4 py-2 rounded-lg border border-gray-300 font-medium" data-filter="all">
+                        All ({{ total_count }})
+                    </button>
+                    <button class="filter-btn px-4 py-2 rounded-lg border border-gray-300 font-medium" data-filter="published">
+                        Published ({{ published_count }})
+                    </button>
+                    <button class="filter-btn px-4 py-2 rounded-lg border border-gray-300 font-medium" data-filter="draft">
+                        Draft ({{ draft_count }})
+                    </button>
+                </div>
+                
+                <!-- Sort -->
+                <div>
+                    <select id="sortSelect" class="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                        <option value="-created_at">Newest First</option>
+                        <option value="created_at">Oldest First</option>
+                        <option value="judul">Title A-Z</option>
+                        <option value="-judul">Title Z-A</option>
+                        <option value="tanggal_akad">Event Date</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Invitations Grid -->
+        {% if invitations %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="invitationsGrid">
+            {% for invitation in invitations %}
+            <div class="invitation-card" data-status="{% if invitation.is_published %}published{% else %}draft{% endif %}" data-title="{{ invitation.judul|lower }}" data-date="{{ invitation.created_at|date:'Y-m-d' }}">
+                <!-- Card Header -->
+                <div class="relative">
+                    {% if invitation.foto_cover %}
+                    <img src="{{ invitation.foto_cover.url }}" alt="{{ invitation.judul }}" class="w-full h-48 object-cover">
+                    {% else %}
+                    <div class="w-full h-48 bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                        <i class="fas fa-heart text-white text-4xl"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Status Badge -->
+                    <div class="absolute top-4 right-4">
+                        <span class="status-badge {% if invitation.is_published %}status-published{% else %}status-draft{% endif %}">
+                            {% if invitation.is_published %}
+                            <i class="fas fa-check mr-1"></i>Published
+                            {% else %}
+                            <i class="fas fa-edit mr-1"></i>Draft
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Card Content -->
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">{{ invitation.judul }}</h3>
+                    <p class="text-gray-600 mb-3">{{ invitation.nama_mempelai_pria }} & {{ invitation.nama_mempelai_wanita }}</p>
+                    
+                    <!-- Event Info -->
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-calendar-alt mr-2 w-4"></i>
+                            <span>{{ invitation.tanggal_akad|date:"d M Y" }}</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-map-marker-alt mr-2 w-4"></i>
+                            <span>{{ invitation.tempat_akad|truncatechars:30 }}</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-clock mr-2 w-4"></i>
+                            <span>Created {{ invitation.created_at|timesince }} ago</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Template Info -->
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                            Template: {{ invitation.template.name }}
+                        </span>
+                        {% if invitation.is_published %}
+                        <span class="text-xs text-green-600 font-medium">
+                            <i class="fas fa-eye mr-1"></i>Live
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex gap-2">
+                        <a href="{% url 'template_editor:edit_invitation' invitation.slug %}" 
+                           class="action-btn btn-edit flex-1 text-center" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'template_editor:invitation_preview' invitation.slug %}" 
+                           target="_blank" class="action-btn btn-view flex-1 text-center" title="Preview">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        {% if not invitation.is_published %}
+                        <button onclick="publishInvitation('{{ invitation.slug }}')" 
+                                class="action-btn btn-publish flex-1" title="Publish">
+                            <i class="fas fa-share"></i>
+                        </button>
+                        {% endif %}
+                        <button onclick="deleteInvitation('{{ invitation.slug }}', '{{ invitation.judul }}')" 
+                                class="action-btn btn-delete flex-1" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="flex justify-center mt-8">
+            <nav class="flex items-center space-x-2">
+                {% if page_obj.has_previous %}
+                <a href="?page=1" class="px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-500 hover:bg-gray-50">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-500 hover:bg-gray-50">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <span class="px-3 py-2 rounded-lg bg-purple-600 text-white">{{ num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?page={{ num }}" class="px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-500 hover:bg-gray-50">{{ num }}</a>
+                {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-500 hover:bg-gray-50">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-500 hover:bg-gray-50">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-16">
+            <div class="max-w-md mx-auto">
+                <i class="fas fa-heart-broken text-6xl text-gray-300 mb-6"></i>
+                <h3 class="text-2xl font-bold text-gray-500 mb-4">No Invitations Yet</h3>
+                <p class="text-gray-400 mb-8">You haven't created any wedding invitations yet. Start by choosing a beautiful template!</p>
+                <a href="{% url 'template_editor:gallery' %}" class="inline-flex items-center bg-purple-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-purple-700 transition-colors">
+                    <i class="fas fa-plus mr-3"></i>Create Your First Invitation
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <div class="text-center">
+                <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Delete Invitation</h3>
+                <p class="text-gray-600 mb-6">Are you sure you want to delete "<span id="deleteInvitationName"></span>"? This action cannot be undone.</p>
+                
+                <div class="flex gap-3">
+                    <button onclick="closeDeleteModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                        Cancel
+                    </button>
+                    <button id="confirmDeleteBtn" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Filter functionality
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const invitationCards = document.querySelectorAll('.invitation-card');
+        const searchInput = document.getElementById('searchInput');
+        const sortSelect = document.getElementById('sortSelect');
+        
+        let currentFilter = 'all';
+        let currentSearch = '';
+        
+        // Filter buttons
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.dataset.filter;
+                applyFilters();
+            });
+        });
+        
+        // Search functionality
+        searchInput.addEventListener('input', function() {
+            currentSearch = this.value.toLowerCase();
+            applyFilters();
+        });
+        
+        // Sort functionality
+        sortSelect.addEventListener('change', function() {
+            sortInvitations(this.value);
+        });
+        
+        function applyFilters() {
+            invitationCards.forEach(card => {
+                const status = card.dataset.status;
+                const title = card.dataset.title;
+                
+                const matchesFilter = currentFilter === 'all' || status === currentFilter;
+                const matchesSearch = currentSearch === '' || title.includes(currentSearch);
+                
+                if (matchesFilter && matchesSearch) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+        
+        function sortInvitations(sortBy) {
+            const grid = document.getElementById('invitationsGrid');
+            const cards = Array.from(invitationCards);
+            
+            cards.sort((a, b) => {
+                let aValue, bValue;
+                
+                switch(sortBy) {
+                    case 'judul':
+                    case '-judul':
+                        aValue = a.dataset.title;
+                        bValue = b.dataset.title;
+                        break;
+                    case 'created_at':
+                    case '-created_at':
+                        aValue = a.dataset.date;
+                        bValue = b.dataset.date;
+                        break;
+                    default:
+                        return 0;
+                }
+                
+                if (sortBy.startsWith('-')) {
+                    return bValue.localeCompare(aValue);
+                } else {
+                    return aValue.localeCompare(bValue);
+                }
+            });
+            
+            cards.forEach(card => grid.appendChild(card));
+        }
+        
+        // Delete functionality
+        let deleteSlug = '';
+        
+        function deleteInvitation(slug, name) {
+            deleteSlug = slug;
+            document.getElementById('deleteInvitationName').textContent = name;
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+        
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+            deleteSlug = '';
+        }
+        
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+            if (deleteSlug) {
+                // Show loading state
+                this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Deleting...';
+                this.disabled = true;
+                
+                // Send delete request
+                fetch(`/template-editor/invitations/${deleteSlug}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remove card from DOM
+                        const card = document.querySelector(`[data-title*="${deleteSlug}"]`);
+                        if (card) {
+                            card.remove();
+                        }
+                        closeDeleteModal();
+                        showNotification('Invitation deleted successfully', 'success');
+                    } else {
+                        showNotification('Failed to delete invitation', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error deleting invitation', 'error');
+                })
+                .finally(() => {
+                    this.innerHTML = 'Delete';
+                    this.disabled = false;
+                });
+            }
+        });
+        
+        // Publish functionality
+        function publishInvitation(slug) {
+            if (confirm('Are you sure you want to publish this invitation? It will be accessible via public URL.')) {
+                fetch(`/template-editor/invitations/${slug}/publish/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload(); // Refresh to show updated status
+                    } else {
+                        showNotification('Failed to publish invitation', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error publishing invitation', 'error');
+                });
+            }
+        }
+        
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg text-white font-medium transition-all duration-300 transform translate-x-full`;
+            
+            switch(type) {
+                case 'success':
+                    notification.classList.add('bg-green-500');
+                    break;
+                case 'error':
+                    notification.classList.add('bg-red-500');
+                    break;
+                default:
+                    notification.classList.add('bg-blue-500');
+            }
+            
+            notification.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
+        
+        // Close modal when clicking outside
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDeleteModal();
+            }
+        });
+        
+        // Add CSRF token to all requests
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
+        if (!document.querySelector('[name=csrfmiddlewaretoken]')) {
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = csrfToken;
+            document.body.appendChild(csrfInput);
+        }
+    </script>
+</body>
+</html>

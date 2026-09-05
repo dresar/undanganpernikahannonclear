@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>{{ undangan.nama_panggilan_wanita }} & {{ undangan.nama_panggilan_pria }} - Wedding Invitation</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Preload Critical Fonts -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- Fallback for browsers that don't support preload -->
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+    </noscript>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <style>
+        /* Base Styles */
+        * {
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+        
+        html {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+        
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            overflow-x: hidden;
+        }
+        
+        .font-dancing { font-family: 'Dancing Script', cursive; }
+        .font-great-vibes { font-family: 'Great Vibes', cursive; }
+        .font-poppins { font-family: 'Poppins', sans-serif; }
+        
+        .bg-gradient-wedding {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+        
+        .bg-gradient-gold {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        }
+        
+        .text-shadow {
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .card-shadow {
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .countdown-item {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+        }
+        
+        .heart-beat {
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .parallax {
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .font-great-vibes {
+                font-size: 3rem !important;
+                line-height: 1.2;
+            }
+            
+            .text-6xl {
+                font-size: 3rem !important;
+            }
+            
+            .text-8xl {
+                font-size: 4rem !important;
+            }
+            
+            .text-5xl {
+                font-size: 2.5rem !important;
+            }
+            
+            .text-6xl {
+                font-size: 3rem !important;
+            }
+            
+            .min-h-screen {
+                min-height: 100vh;
+                padding: 2rem 1rem;
+            }
+            
+            .py-20 {
+                padding-top: 3rem !important;
+                padding-bottom: 3rem !important;
+            }
+            
+            .px-4 {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
+            
+            .gap-12 {
+                gap: 2rem !important;
+            }
+            
+            .w-64 {
+                width: 12rem !important;
+                height: 12rem !important;
+            }
+            
+            .h-64 {
+                height: 12rem !important;
+            }
+            
+            .p-8 {
+                padding: 1.5rem !important;
+            }
+            
+            .p-6 {
+                padding: 1rem !important;
+            }
+            
+            .mb-16 {
+                margin-bottom: 2rem !important;
+            }
+            
+            .mb-8 {
+                margin-bottom: 1.5rem !important;
+            }
+            
+            .parallax {
+                background-attachment: scroll;
+            }
+            
+            .backdrop-filter {
+                backdrop-filter: none;
+            }
+            
+            .floating {
+                animation: none;
+            }
+            
+            .heart-beat {
+                animation: none;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .font-great-vibes {
+                font-size: 2.5rem !important;
+            }
+            
+            .text-6xl, .text-8xl {
+                font-size: 2.5rem !important;
+            }
+            
+            .text-5xl {
+                font-size: 2rem !important;
+            }
+            
+            .container {
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+            }
+            
+            .px-4 {
+                padding-left: 0.5rem !important;
+                padding-right: 0.5rem !important;
+            }
+            
+            .w-64, .h-64 {
+                width: 10rem !important;
+                height: 10rem !important;
+            }
+            
+            .p-8 {
+                padding: 1rem !important;
+            }
+            
+            .rounded-2xl {
+                 border-radius: 1rem;
+             }
+         }
+         
+         /* Android Specific Optimizations */
+         @media screen and (-webkit-min-device-pixel-ratio: 1) {
+             body {
+                 -webkit-tap-highlight-color: transparent;
+                 -webkit-touch-callout: none;
+                 -webkit-user-select: none;
+                 -khtml-user-select: none;
+                 -moz-user-select: none;
+                 -ms-user-select: none;
+                 user-select: none;
+             }
+             
+             button, a {
+                 -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+                 -webkit-user-select: none;
+                 user-select: none;
+                 touch-action: manipulation;
+             }
+             
+             img {
+                 -webkit-user-drag: none;
+                 -khtml-user-drag: none;
+                 -moz-user-drag: none;
+                 -o-user-drag: none;
+                 user-drag: none;
+                 pointer-events: none;
+             }
+             
+             .bg-gradient-wedding {
+                 background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+                 background-attachment: scroll;
+             }
+             
+             .card-shadow {
+                 box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+             }
+         }
+         
+         /* Fix for Android Chrome rendering issues */
+         @supports (-webkit-appearance: none) {
+             .backdrop-filter {
+                 background: rgba(255, 255, 255, 0.9);
+                 backdrop-filter: none;
+             }
+             
+             .bg-opacity-20 {
+                 background-color: rgba(255, 255, 255, 0.9) !important;
+             }
+         }
+    </style>
+</head>
+<body class="font-poppins bg-gray-50">
+    
+    <!-- Back Button -->
+    <div class="fixed top-4 left-4 z-50">
+        <a href="javascript:history.back()" class="bg-white bg-opacity-90 backdrop-filter backdrop-blur-lg text-gray-800 p-3 rounded-full shadow-lg hover:bg-opacity-100 transition-all duration-300 transform hover:scale-105">
+            <i class="fas fa-arrow-left text-lg"></i>
+        </a>
+    </div>
+    
+    <!-- Hero Section -->
+    <section class="min-h-screen bg-gradient-wedding flex items-center justify-center relative overflow-hidden">
+        <!-- Background Decorations -->
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-10 left-10 w-20 h-20 bg-white rounded-full floating"></div>
+            <div class="absolute top-32 right-20 w-16 h-16 bg-white rounded-full floating" style="animation-delay: 1s;"></div>
+            <div class="absolute bottom-20 left-32 w-12 h-12 bg-white rounded-full floating" style="animation-delay: 2s;"></div>
+            <div class="absolute bottom-40 right-10 w-24 h-24 bg-white rounded-full floating" style="animation-delay: 0.5s;"></div>
+        </div>
+        
+        <div class="text-center z-10 px-4" data-aos="fade-up">
+            <div class="mb-8">
+                <i class="fas fa-heart text-6xl text-red-400 heart-beat mb-4"></i>
+            </div>
+            
+            <h1 class="font-great-vibes text-6xl md:text-8xl text-white text-shadow mb-4">
+                {{ undangan.nama_panggilan_wanita }}
+            </h1>
+            
+            <div class="text-2xl md:text-3xl text-white font-light mb-4 font-dancing">
+                &
+            </div>
+            
+            <h1 class="font-great-vibes text-6xl md:text-8xl text-white text-shadow mb-8">
+                {{ undangan.nama_panggilan_pria }}
+            </h1>
+            
+            <div class="bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg rounded-lg p-6 mb-8 inline-block">
+                <p class="text-white text-lg md:text-xl font-light">
+                    {{ undangan.tanggal_waktu_acara_1|date:"d F Y" }}
+                </p>
+                <p class="text-white text-base md:text-lg font-light">
+                    {{ undangan.nama_lokasi_acara_1 }}
+                </p>
+            </div>
+            
+            <div class="space-y-4">
+                <p class="text-white text-lg font-light">
+                    Dengan penuh sukacita, kami mengundang Anda untuk merayakan hari bahagia kami
+                </p>
+                
+                <button onclick="scrollToSection('story')" class="bg-white text-gray-800 px-8 py-3 rounded-full font-medium hover:bg-gray-100 transition-all duration-300 transform hover:scale-105">
+                    <i class="fas fa-heart mr-2"></i>
+                    Lihat Undangan
+                </button>
+            </div>
+        </div>
+        
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white animate-bounce">
+            <i class="fas fa-chevron-down text-2xl"></i>
+        </div>
+    </section>
+    
+    <!-- Story Section -->
+    <section id="story" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="font-great-vibes text-5xl md:text-6xl text-gray-800 mb-4">Our Story</h2>
+                <div class="w-24 h-1 bg-gradient-gold mx-auto rounded-full"></div>
+            </div>
+            
+            <div class="max-w-4xl mx-auto">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div data-aos="fade-right">
+                        <div class="bg-gradient-to-br from-pink-50 to-orange-50 rounded-2xl p-8 card-shadow">
+                            <h3 class="font-dancing text-3xl text-gray-800 mb-4">Bagaimana Kami Bertemu</h3>
+                            <p class="text-gray-600 leading-relaxed">
+                                {{ undangan.teks_pengantar_cerita|default:"Cerita cinta kami dimulai dari pertemuan yang tak terduga. Dari pertemanan yang indah, berkembang menjadi cinta yang mendalam. Setiap hari bersama adalah anugerah yang luar biasa." }}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div data-aos="fade-left">
+                        <div class="relative">
+                            {% if undangan.foto_cover %}
+                                <img src="{{ undangan.foto_cover.url }}" alt="{{ undangan.nama_panggilan_wanita }} & {{ undangan.nama_panggilan_pria }}" class="w-full h-80 object-cover rounded-2xl card-shadow">
+                            {% else %}
+                                <div class="w-full h-80 bg-gradient-wedding rounded-2xl card-shadow flex items-center justify-center">
+                                    <i class="fas fa-heart text-6xl text-white opacity-50"></i>
+                                </div>
+                            {% endif %}
+                            <div class="absolute -bottom-4 -right-4 bg-white p-4 rounded-full card-shadow">
+                                <i class="fas fa-heart text-2xl text-red-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Bride & Groom Section -->
+    <section class="py-20 bg-gradient-to-br from-pink-50 to-orange-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="font-great-vibes text-5xl md:text-6xl text-gray-800 mb-4">The Couple</h2>
+                <div class="w-24 h-1 bg-gradient-gold mx-auto rounded-full"></div>
+            </div>
+            
+            <div class="max-w-6xl mx-auto">
+                <div class="grid md:grid-cols-2 gap-12">
+                    <!-- Bride -->
+                    <div class="text-center" data-aos="fade-up" data-aos-delay="100">
+                        <div class="relative inline-block mb-6">
+                            {% if undangan.foto_wanita %}
+                                <img src="{{ undangan.foto_wanita.url }}" alt="{{ undangan.nama_panggilan_wanita }}" class="w-64 h-64 object-cover rounded-full mx-auto card-shadow">
+                            {% else %}
+                                <div class="w-64 h-64 bg-gradient-wedding rounded-full mx-auto card-shadow flex items-center justify-center">
+                                    <i class="fas fa-female text-6xl text-white"></i>
+                                </div>
+                            {% endif %}
+                            <div class="absolute -bottom-2 -right-2 bg-pink-400 p-3 rounded-full">
+                                <i class="fas fa-crown text-white text-xl"></i>
+                            </div>
+                        </div>
+                        
+                        <h3 class="font-great-vibes text-4xl text-gray-800 mb-2">{{ undangan.nama_lengkap_wanita }}</h3>
+                        <p class="text-gray-600 mb-4">Putri dari</p>
+                        <p class="text-gray-800 font-medium">{{ undangan.info_orang_tua_wanita|default:"Bapak & Ibu [Nama Orang Tua]" }}</p>
+                        
+
+                    </div>
+                    
+                    <!-- Groom -->
+                    <div class="text-center" data-aos="fade-up" data-aos-delay="200">
+                        <div class="relative inline-block mb-6">
+                            {% if undangan.foto_pria %}
+                                <img src="{{ undangan.foto_pria.url }}" alt="{{ undangan.nama_panggilan_pria }}" class="w-64 h-64 object-cover rounded-full mx-auto card-shadow">
+                            {% else %}
+                                <div class="w-64 h-64 bg-gradient-wedding rounded-full mx-auto card-shadow flex items-center justify-center">
+                                    <i class="fas fa-male text-6xl text-white"></i>
+                                </div>
+                            {% endif %}
+                            <div class="absolute -bottom-2 -right-2 bg-blue-400 p-3 rounded-full">
+                                <i class="fas fa-crown text-white text-xl"></i>
+                            </div>
+                        </div>
+                        
+                        <h3 class="font-great-vibes text-4xl text-gray-800 mb-2">{{ undangan.nama_lengkap_pria }}</h3>
+                        <p class="text-gray-600 mb-4">Putra dari</p>
+                        <p class="text-gray-800 font-medium">{{ undangan.info_orang_tua_pria|default:"Bapak & Ibu [Nama Orang Tua]" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Event Details Section -->
+    <section class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="font-great-vibes text-5xl md:text-6xl text-gray-800 mb-4">Wedding Details</h2>
+                <div class="w-24 h-1 bg-gradient-gold mx-auto rounded-full"></div>
+            </div>
+            
+            <div class="max-w-4xl mx-auto">
+                <!-- Countdown -->
+                <div class="text-center mb-16" data-aos="fade-up">
+                    <h3 class="font-dancing text-3xl text-gray-800 mb-8">Menuju Hari Bahagia</h3>
+                    <div id="countdown" class="flex justify-center space-x-4 flex-wrap">
+                        <div class="countdown-item rounded-lg p-4 m-2 text-center min-w-20">
+                            <div class="text-3xl font-bold text-gray-800" id="days">00</div>
+                            <div class="text-sm text-gray-600">Hari</div>
+                        </div>
+                        <div class="countdown-item rounded-lg p-4 m-2 text-center min-w-20">
+                            <div class="text-3xl font-bold text-gray-800" id="hours">00</div>
+                            <div class="text-sm text-gray-600">Jam</div>
+                        </div>
+                        <div class="countdown-item rounded-lg p-4 m-2 text-center min-w-20">
+                            <div class="text-3xl font-bold text-gray-800" id="minutes">00</div>
+                            <div class="text-sm text-gray-600">Menit</div>
+                        </div>
+                        <div class="countdown-item rounded-lg p-4 m-2 text-center min-w-20">
+                            <div class="text-3xl font-bold text-gray-800" id="seconds">00</div>
+                            <div class="text-sm text-gray-600">Detik</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Event Cards -->
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Akad Nikah -->
+                    <div class="bg-gradient-to-br from-pink-50 to-rose-50 rounded-2xl p-8 card-shadow" data-aos="fade-right">
+                        <div class="text-center">
+                            <div class="bg-pink-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-ring text-2xl text-pink-600"></i>
+                            </div>
+                            <h3 class="font-dancing text-3xl text-gray-800 mb-4">Akad Nikah</h3>
+                            <div class="space-y-2 text-gray-600">
+                                <p><i class="fas fa-calendar mr-2"></i>{{ undangan.tanggal_akad|date:"l, d F Y" }}</p>
+                                <p><i class="fas fa-clock mr-2"></i>{{ undangan.waktu_akad|time:"H:i" }} WIB</p>
+                                <p><i class="fas fa-map-marker-alt mr-2"></i>{{ undangan.tempat_akad }}</p>
+                                <p class="text-sm">{{ undangan.alamat_akad }}</p>
+                            </div>
+                            {% if undangan.link_maps_akad %}
+                            <a href="{{ undangan.link_maps_akad }}" target="_blank" class="inline-block mt-4 bg-pink-500 text-white px-6 py-2 rounded-full hover:bg-pink-600 transition-colors">
+                                <i class="fas fa-map mr-2"></i>Lihat Lokasi
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Resepsi -->
+                    <div class="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-2xl p-8 card-shadow" data-aos="fade-left">
+                        <div class="text-center">
+                            <div class="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-glass-cheers text-2xl text-orange-600"></i>
+                            </div>
+                            <h3 class="font-dancing text-3xl text-gray-800 mb-4">Resepsi</h3>
+                            <div class="space-y-2 text-gray-600">
+                                <p><i class="fas fa-calendar mr-2"></i>{{ undangan.tanggal_resepsi|date:"l, d F Y" }}</p>
+                                <p><i class="fas fa-clock mr-2"></i>{{ undangan.waktu_resepsi|time:"H:i" }} WIB</p>
+                                <p><i class="fas fa-map-marker-alt mr-2"></i>{{ undangan.tempat_resepsi }}</p>
+                                <p class="text-sm">{{ undangan.alamat_resepsi }}</p>
+                            </div>
+                            {% if undangan.link_maps_resepsi %}
+                            <a href="{{ undangan.link_maps_resepsi }}" target="_blank" class="inline-block mt-4 bg-orange-500 text-white px-6 py-2 rounded-full hover:bg-orange-600 transition-colors">
+                                <i class="fas fa-map mr-2"></i>Lihat Lokasi
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Gallery Section -->
+    {% if undangan.galeri_foto.exists %}
+    <section class="py-20 bg-gradient-to-br from-pink-50 to-orange-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="font-great-vibes text-5xl md:text-6xl text-gray-800 mb-4">Our Gallery</h2>
+                <div class="w-24 h-1 bg-gradient-gold mx-auto rounded-full"></div>
+            </div>
+            
+            <div class="max-w-6xl mx-auto">
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {% for photo in undangan.galeri_foto.all %}
+                    <div class="aspect-square overflow-hidden rounded-lg card-shadow" data-aos="zoom-in" data-aos-delay="{{ forloop.counter0|add:100 }}">
+                        <img src="{{ photo.foto.url }}" alt="Gallery {{ forloop.counter }}" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300 cursor-pointer" onclick="openLightbox('{{ photo.foto.url }}')">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+    
+    <!-- Gift Section -->
+    {% if undangan.rekening_hadiah.exists %}
+    <section class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="font-great-vibes text-5xl md:text-6xl text-gray-800 mb-4">Wedding Gift</h2>
+                <div class="w-24 h-1 bg-gradient-gold mx-auto rounded-full"></div>
+                <p class="text-gray-600 mt-4 max-w-2xl mx-auto">
+                    Doa restu Anda merupakan karunia yang sangat berarti bagi kami. Dan jika memberi adalah ungkapan tanda kasih Anda, Anda dapat memberi kado secara cashless.
+                </p>
+            </div>
+            
+            <div class="max-w-2xl mx-auto">
+                <div class="space-y-6">
+                    {% for gift in undangan.rekening_hadiah.all %}
+                    <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6 card-shadow" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="bg-yellow-100 w-12 h-12 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-university text-yellow-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">{{ gift.nama_bank }}</h3>
+                                    <p class="text-gray-600">{{ gift.nama_pemilik }}</p>
+                                    <p class="text-lg font-mono font-bold text-gray-800">{{ gift.nomor_rekening }}</p>
+                                </div>
+                            </div>
+                            <button onclick="copyToClipboard('{{ gift.nomor_rekening }}')" class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+    
+    <!-- Comments Section -->
+    <section class="py-20 bg-gradient-to-br from-pink-50 to-orange-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="font-great-vibes text-5xl md:text-6xl text-gray-800 mb-4">Wedding Wishes</h2>
+                <div class="w-24 h-1 bg-gradient-gold mx-auto rounded-full"></div>
+            </div>
+            
+            <div class="max-w-4xl mx-auto">
+                <!-- Comment Form -->
+                <div class="bg-white rounded-2xl p-8 card-shadow mb-8" data-aos="fade-up">
+                    <form id="commentForm" class="space-y-4">
+                        {% csrf_token %}
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <input type="text" name="nama_tamu" placeholder="Nama Anda" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                            <select name="kehadiran" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                <option value="">Konfirmasi Kehadiran</option>
+                                <option value="hadir">Hadir</option>
+                                <option value="tidak_hadir">Tidak Hadir</option>
+                            </select>
+                        </div>
+                        <textarea name="pesan" placeholder="Tulis ucapan dan doa untuk kami..." required rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"></textarea>
+                        <button type="submit" class="bg-gradient-gold text-white px-8 py-3 rounded-lg font-medium hover:opacity-90 transition-opacity">
+                            <i class="fas fa-paper-plane mr-2"></i>
+                            Kirim Ucapan
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Comments List -->
+                <div id="commentsList" class="space-y-6">
+                    {% for comment in undangan.komentar_tamu.all|slice:":10" %}
+                    <div class="bg-white rounded-xl p-6 card-shadow" data-aos="fade-up">
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-gradient-gold w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <h4 class="font-semibold text-gray-800">{{ comment.nama_tamu }}</h4>
+                                    <span class="px-2 py-1 text-xs rounded-full {% if comment.kehadiran == 'hadir' %}bg-green-100 text-green-600{% else %}bg-red-100 text-red-600{% endif %}">
+                                        {% if comment.kehadiran == 'hadir' %}Hadir{% else %}Tidak Hadir{% endif %}
+                                    </span>
+                                </div>
+                                <p class="text-gray-600 mb-2">{{ comment.pesan }}</p>
+                                <p class="text-sm text-gray-400">{{ comment.created_at|timesince }} yang lalu</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-8">
+                        <i class="fas fa-comments text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500">Belum ada ucapan. Jadilah yang pertama!</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if undangan.komentar_tamu.count > 10 %}
+                <div class="text-center mt-8">
+                    <button onclick="loadMoreComments()" class="text-pink-500 hover:text-pink-600 font-medium">
+                        Lihat Ucapan Lainnya ({{ undangan.komentar_tamu.count|add:"-10" }} lagi)
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4 text-center">
+            <div class="mb-6">
+                <i class="fas fa-heart text-3xl text-red-400 heart-beat"></i>
+            </div>
+            <h3 class="font-great-vibes text-4xl mb-4">{{ undangan.nama_lengkap_wanita }} & {{ undangan.nama_lengkap_pria }}</h3>
+            <p class="text-gray-300 mb-6">Terima kasih atas doa dan ucapan yang telah Anda berikan</p>
+            
+            <div class="flex justify-center space-x-4 mb-6">
+
+            </div>
+            
+            <p class="text-sm text-gray-400">
+                © {{ current_year }} Wedding Invitation. Made with <i class="fas fa-heart text-red-400"></i>
+            </p>
+        </div>
+    </footer>
+    
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden flex items-center justify-center p-4">
+        <div class="relative max-w-4xl max-h-full">
+            <img id="lightboxImage" src="" alt="" class="max-w-full max-h-full object-contain">
+            <button onclick="closeLightbox()" class="absolute top-4 right-4 text-white text-3xl hover:text-gray-300">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Mobile Detection and Optimization
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isAndroid = /Android/i.test(navigator.userAgent);
+        
+        // Optimize for mobile devices
+        if (isMobile) {
+            // Disable animations on mobile for better performance
+            AOS.init({
+                duration: 500,
+                once: true,
+                disable: 'mobile'
+            });
+            
+            // Reduce animation complexity on Android
+            if (isAndroid) {
+                document.body.classList.add('android-device');
+                
+                // Disable heavy animations
+                const style = document.createElement('style');
+                style.textContent = `
+                    .android-device .floating,
+                    .android-device .heart-beat {
+                        animation: none !important;
+                    }
+                    .android-device .backdrop-filter {
+                        backdrop-filter: none !important;
+                        background: rgba(255, 255, 255, 0.95) !important;
+                    }
+                    .android-device .parallax {
+                        background-attachment: scroll !important;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        } else {
+            // Full animations for desktop
+            AOS.init({
+                duration: 1000,
+                once: true
+            });
+        }
+        
+        // Countdown Timer
+        function updateCountdown() {
+            const weddingDate = new Date('{{ undangan.tanggal_resepsi|date:"Y-m-d" }}T{{ undangan.waktu_resepsi|time:"H:i" }}:00');
+            const now = new Date();
+            const diff = weddingDate - now;
+            
+            if (diff > 0) {
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                document.getElementById('days').textContent = days.toString().padStart(2, '0');
+                document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+                document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+                document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+            } else {
+                document.getElementById('countdown').innerHTML = '<div class="text-2xl font-bold text-gray-800">Hari Bahagia Telah Tiba! 🎉</div>';
+            }
+        }
+        
+        // Update countdown every second
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+        
+        // Smooth scroll function
+        function scrollToSection(sectionId) {
+            document.getElementById(sectionId).scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+        
+        // Copy to clipboard function
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert('Nomor rekening berhasil disalin!');
+            });
+        }
+        
+        // Lightbox functions
+        function openLightbox(imageSrc) {
+            document.getElementById('lightboxImage').src = imageSrc;
+            document.getElementById('lightbox').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Close lightbox on click outside
+        document.getElementById('lightbox').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLightbox();
+            }
+        });
+        
+        // Comment form submission
+        document.getElementById('commentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch('{% url "template_editor:add_guest_comment" undangan.slug %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Reset form
+                    this.reset();
+                    
+                    // Add new comment to list
+                    const commentsList = document.getElementById('commentsList');
+                    const newComment = document.createElement('div');
+                    newComment.className = 'bg-white rounded-xl p-6 card-shadow';
+                    newComment.innerHTML = `
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-gradient-gold w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <h4 class="font-semibold text-gray-800">${data.comment.nama_tamu}</h4>
+                                    <span class="px-2 py-1 text-xs rounded-full ${data.comment.kehadiran === 'hadir' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">
+                                        ${data.comment.kehadiran === 'hadir' ? 'Hadir' : 'Tidak Hadir'}
+                                    </span>
+                                </div>
+                                <p class="text-gray-600 mb-2">${data.comment.pesan}</p>
+                                <p class="text-sm text-gray-400">Baru saja</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    commentsList.insertBefore(newComment, commentsList.firstChild);
+                    
+                    // Show success message
+                    alert('Ucapan berhasil dikirim!');
+                } else {
+                    alert('Terjadi kesalahan. Silakan coba lagi.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan. Silakan coba lagi.');
+            });
+        });
+        
+        // Load more comments function
+        function loadMoreComments() {
+            // Implementation for loading more comments via AJAX
+            // This would require additional backend support
+        }
+        
+        // Android-specific optimizations
+        if (isAndroid) {
+            // Optimize touch events
+            document.addEventListener('touchstart', function() {}, {passive: true});
+            document.addEventListener('touchmove', function() {}, {passive: true});
+            
+            // Lazy load images for better performance
+            const images = document.querySelectorAll('img');
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        if (img.dataset.src) {
+                            img.src = img.dataset.src;
+                            img.removeAttribute('data-src');
+                        }
+                        observer.unobserve(img);
+                    }
+                });
+            });
+            
+            images.forEach(img => {
+                if (img.src && !img.dataset.src) {
+                    img.dataset.src = img.src;
+                    img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSIxIiB2aWV3Qm94PSIwIDAgMSAxIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNGM0Y0RjYiLz48L3N2Zz4=';
+                }
+                imageObserver.observe(img);
+            });
+            
+            // Optimize scroll performance
+            let ticking = false;
+            function updateScrollPosition() {
+                // Throttle scroll events
+                ticking = false;
+            }
+            
+            document.addEventListener('scroll', function() {
+                if (!ticking) {
+                    requestAnimationFrame(updateScrollPosition);
+                    ticking = true;
+                }
+            }, {passive: true});
+            
+            // Reduce memory usage by removing unused event listeners
+            window.addEventListener('beforeunload', function() {
+                document.removeEventListener('touchstart', function() {});
+                document.removeEventListener('touchmove', function() {});
+                document.removeEventListener('scroll', function() {});
+            });
+        }
+        
+        // Preload critical resources
+        document.addEventListener('DOMContentLoaded', function() {
+            // Preload fonts
+            const fontPreloads = [
+                'https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap',
+                'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap',
+                'https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap'
+            ];
+            
+            fontPreloads.forEach(font => {
+                const link = document.createElement('link');
+                link.rel = 'preload';
+                link.as = 'style';
+                link.href = font;
+                document.head.appendChild(link);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Analytics Dashboard - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Analytics Dashboard</h1>
+        <div class="flex space-x-2">
+            <select class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                <option value="7">Last 7 days</option>
+                <option value="30" selected>Last 30 days</option>
+                <option value="90">Last 90 days</option>
+                <option value="365">Last year</option>
+            </select>
+            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                <i class="fas fa-download mr-2"></i>Export Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Key Metrics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Orders</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">1,234</p>
+                    <p class="text-sm text-green-600">+12% from last month</p>
+                </div>
+                <div class="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
+                    <i class="fas fa-shopping-cart text-blue-600 dark:text-blue-400 text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Revenue</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">$45,678</p>
+                    <p class="text-sm text-green-600">+8% from last month</p>
+                </div>
+                <div class="bg-green-100 dark:bg-green-900 p-3 rounded-full">
+                    <i class="fas fa-dollar-sign text-green-600 dark:text-green-400 text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Active Users</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">892</p>
+                    <p class="text-sm text-red-600">-3% from last month</p>
+                </div>
+                <div class="bg-purple-100 dark:bg-purple-900 p-3 rounded-full">
+                    <i class="fas fa-users text-purple-600 dark:text-purple-400 text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Templates Used</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">567</p>
+                    <p class="text-sm text-green-600">+15% from last month</p>
+                </div>
+                <div class="bg-yellow-100 dark:bg-yellow-900 p-3 rounded-full">
+                    <i class="fas fa-file-alt text-yellow-600 dark:text-yellow-400 text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Revenue Chart -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Revenue Trend</h2>
+            <div class="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div class="text-center">
+                    <i class="fas fa-chart-line text-4xl text-gray-400 dark:text-gray-500 mb-2"></i>
+                    <p class="text-gray-500 dark:text-gray-400">Revenue chart will be displayed here</p>
+                    <p class="text-sm text-gray-400 dark:text-gray-500">Integration with Chart.js or similar library</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Chart -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Orders Overview</h2>
+            <div class="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div class="text-center">
+                    <i class="fas fa-chart-bar text-4xl text-gray-400 dark:text-gray-500 mb-2"></i>
+                    <p class="text-gray-500 dark:text-gray-400">Orders chart will be displayed here</p>
+                    <p class="text-sm text-gray-400 dark:text-gray-500">Bar chart showing daily/weekly orders</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popular Templates -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Popular Templates</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Template Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Usage Count</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Revenue</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Trend</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-gradient-to-r from-pink-400 to-purple-500 rounded-lg mr-3"></div>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">Elegant Rose</div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">Premium template</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">Classic</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">156</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">$4,680</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                                <i class="fas fa-arrow-up mr-1"></i>+12%
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-gradient-to-r from-blue-400 to-teal-500 rounded-lg mr-3"></div>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">Modern Minimalist</div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">Standard template</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">Modern</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">134</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">$2,680</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                                <i class="fas fa-arrow-up mr-1"></i>+8%
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg mr-3"></div>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">Golden Luxury</div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">Premium template</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">Luxury</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">98</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">$4,900</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100">
+                                <i class="fas fa-arrow-down mr-1"></i>-2%
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg mr-3"></div>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">Nature Inspired</div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">Standard template</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">Nature</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">87</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">$1,740</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                                <i class="fas fa-arrow-up mr-1"></i>+5%
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Recent Orders -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Recent Orders</h2>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium mr-3">
+                            JD
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">John Doe</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Elegant Rose Template</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">$30</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">2 hours ago</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-medium mr-3">
+                            SM
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">Sarah Miller</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Modern Minimalist</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">$20</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">4 hours ago</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-medium mr-3">
+                            RJ
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">Robert Johnson</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Golden Luxury</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">$50</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">6 hours ago</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">System Status</h2>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                        <span class="text-sm text-gray-700 dark:text-gray-300">Server Status</span>
+                    </div>
+                    <span class="text-sm font-medium text-green-600">Online</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                        <span class="text-sm text-gray-700 dark:text-gray-300">Database</span>
+                    </div>
+                    <span class="text-sm font-medium text-green-600">Connected</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
+                        <span class="text-sm text-gray-700 dark:text-gray-300">Email Service</span>
+                    </div>
+                    <span class="text-sm font-medium text-yellow-600">Limited</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                        <span class="text-sm text-gray-700 dark:text-gray-300">Payment Gateway</span>
+                    </div>
+                    <span class="text-sm font-medium text-green-600">Active</span>
+                </div>
+                <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900 rounded-lg">
+                    <p class="text-sm text-blue-800 dark:text-blue-200">Last backup: 2 hours ago</p>
+                    <p class="text-xs text-blue-600 dark:text-blue-300">Next scheduled backup: Tomorrow at 2:00 AM</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

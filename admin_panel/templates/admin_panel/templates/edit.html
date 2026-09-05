@@ -1,0 +1,520 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% block title %}Edit Template{% endblock %}
+{% block page_title %}Edit Template: {{ template.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        background: rgba(31, 41, 55, 0.8);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(75, 85, 99, 0.3);
+    }
+    
+    .editor-container {
+        background: rgba(17, 24, 39, 0.9);
+        border: 1px solid rgba(75, 85, 99, 0.5);
+    }
+    
+    .template-preview {
+        background: white;
+        border: 2px solid #e5e7eb;
+        min-height: 400px;
+    }
+    
+    .version-item {
+        transition: all 0.3s ease;
+    }
+    
+    .version-item:hover {
+        background: rgba(75, 85, 99, 0.3);
+        transform: translateX(4px);
+    }
+    
+    .current-preview {
+        border: 2px solid #3b82f6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Template Info -->
+    <div class="form-container rounded-xl p-6 mb-6">
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h2 class="text-xl font-semibold text-white mb-2">{{ template.name }}</h2>
+                <p class="text-gray-400">{{ template.description|default:"No description" }}</p>
+                <div class="flex items-center space-x-4 mt-2 text-sm text-gray-400">
+                    <span><i class="fas fa-calendar mr-1"></i> Created: {{ template.created_at|date:"M d, Y" }}</span>
+                    <span><i class="fas fa-edit mr-1"></i> Updated: {{ template.updated_at|date:"M d, Y" }}</span>
+                    <span><i class="fas fa-eye mr-1"></i> Views: {{ template.view_count|default:0 }}</span>
+                </div>
+            </div>
+            <div class="flex space-x-2">
+                <button onclick="previewTemplate()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-eye mr-2"></i>
+                    Preview
+                </button>
+                <button onclick="duplicateTemplate()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-copy mr-2"></i>
+                    Duplicate
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- Main Edit Form -->
+        <div class="lg:col-span-3">
+            <div class="form-container rounded-xl p-6">
+                <h3 class="text-lg font-semibold text-white mb-6">Edit Template</h3>
+                
+                <form method="post" enctype="multipart/form-data" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="name" class="block text-gray-300 text-sm font-medium mb-2">Template Name *</label>
+                            <input type="text" id="name" name="name" value="{{ template.name }}" required 
+                                   class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label for="category" class="block text-gray-300 text-sm font-medium mb-2">Category</label>
+                            <select id="category" name="category" 
+                                    class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Select Category</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}" {% if template.category_id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="description" class="block text-gray-300 text-sm font-medium mb-2">Description</label>
+                        <textarea id="description" name="description" rows="3" 
+                                  class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">{{ template.description }}</textarea>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="preview_image" class="block text-gray-300 text-sm font-medium mb-2">Preview Image</label>
+                            <input type="file" id="preview_image" name="preview_image" accept="image/*" 
+                                   class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            {% if template.preview_image %}
+                            <div class="mt-2">
+                                <img src="{{ template.preview_image.url }}" alt="Current preview" class="w-20 h-20 object-cover rounded-lg">
+                                <p class="text-xs text-gray-400 mt-1">Current image</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-300 text-sm font-medium mb-2">Template Status</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="is_active" {% if template.is_active %}checked{% endif %} 
+                                           class="rounded border-gray-600 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-800">
+                                    <span class="ml-2 text-gray-300">Active</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="is_featured" {% if template.is_featured %}checked{% endif %} 
+                                           class="rounded border-gray-600 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-800">
+                                    <span class="ml-2 text-gray-300">Featured</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- HTML Content Editor -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="html_content" class="block text-gray-300 text-sm font-medium">HTML Content *</label>
+                            <div class="flex space-x-2">
+                                <button type="button" onclick="formatCode()" class="text-xs bg-gray-600 hover:bg-gray-700 text-white px-2 py-1 rounded transition-colors">
+                                    <i class="fas fa-code mr-1"></i>
+                                    Format
+                                </button>
+                                <button type="button" onclick="toggleFullscreen()" class="text-xs bg-gray-600 hover:bg-gray-700 text-white px-2 py-1 rounded transition-colors">
+                                    <i class="fas fa-expand mr-1"></i>
+                                    Fullscreen
+                                </button>
+                            </div>
+                        </div>
+                        <div class="editor-container rounded-lg" id="editor-container">
+                            <textarea id="html_content" name="html_content" rows="20" required 
+                                      class="w-full px-4 py-3 bg-transparent border-0 text-white font-mono text-sm focus:ring-0 focus:outline-none resize-none"
+                                      placeholder="Enter your HTML content here...">{{ template.html_content }}</textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- CSS Content Editor -->
+                    {% if template.css_content %}
+                    <div>
+                        <label for="css_content" class="block text-gray-300 text-sm font-medium mb-2">CSS Content</label>
+                        <div class="editor-container rounded-lg">
+                            <textarea id="css_content" name="css_content" rows="10" 
+                                      class="w-full px-4 py-3 bg-transparent border-0 text-white font-mono text-sm focus:ring-0 focus:outline-none resize-none"
+                                      placeholder="Enter your CSS content here...">{{ template.css_content }}</textarea>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- JavaScript Content Editor -->
+                    {% if template.js_content %}
+                    <div>
+                        <label for="js_content" class="block text-gray-300 text-sm font-medium mb-2">JavaScript Content</label>
+                        <div class="editor-container rounded-lg">
+                            <textarea id="js_content" name="js_content" rows="8" 
+                                      class="w-full px-4 py-3 bg-transparent border-0 text-white font-mono text-sm focus:ring-0 focus:outline-none resize-none"
+                                      placeholder="Enter your JavaScript content here...">{{ template.js_content }}</textarea>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="flex justify-between items-center">
+                        <a href="{% url 'admin_panel:templates_list' %}" 
+                           class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Back to Templates
+                        </a>
+                        
+                        <div class="flex space-x-4">
+                            <button type="button" onclick="saveAsDraft()" 
+                                    class="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg transition-colors">
+                                <i class="fas fa-save mr-2"></i>
+                                Save as Draft
+                            </button>
+                            <button type="submit" 
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors">
+                                <i class="fas fa-check mr-2"></i>
+                                Update Template
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Live Preview -->
+            <div class="form-container rounded-xl p-6">
+                <h3 class="text-lg font-semibold text-white mb-4">Live Preview</h3>
+                <div id="template-preview" class="template-preview rounded-lg p-4 current-preview">
+                    {{ template.html_content|safe }}
+                </div>
+                <button onclick="refreshPreview()" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-sync-alt mr-2"></i>
+                    Refresh Preview
+                </button>
+            </div>
+            
+            <!-- Version History -->
+            <div class="form-container rounded-xl p-6">
+                <h3 class="text-lg font-semibold text-white mb-4">Version History</h3>
+                <div class="space-y-2 max-h-64 overflow-y-auto">
+                    {% for version in versions %}
+                    <div class="version-item p-3 rounded-lg cursor-pointer" onclick="loadVersion('{{ version.id }}')">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-white font-medium">v{{ version.version_number }}</p>
+                                <p class="text-xs text-gray-400">{{ version.created_at|timesince }} ago</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                {% if version.is_published %}
+                                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                {% endif %}
+                                <button onclick="event.stopPropagation(); restoreVersion('{{ version.id }}')" 
+                                        class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded transition-colors">
+                                    Restore
+                                </button>
+                            </div>
+                        </div>
+                        {% if version.changelog %}
+                        <p class="text-xs text-gray-400 mt-1">{{ version.changelog|truncatechars:50 }}</p>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="text-center text-gray-400 py-4">
+                        <p class="text-sm">No version history</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Template Stats -->
+            <div class="form-container rounded-xl p-6">
+                <h3 class="text-lg font-semibold text-white mb-4">Template Stats</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Total Views:</span>
+                        <span class="text-white">{{ template.view_count|default:0 }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Downloads:</span>
+                        <span class="text-white">{{ template.download_count|default:0 }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Orders:</span>
+                        <span class="text-white">{{ template.order_count|default:0 }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Rating:</span>
+                        <span class="text-white">
+                            {% if template.average_rating %}
+                                {{ template.average_rating|floatformat:1 }}/5
+                            {% else %}
+                                No ratings
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div id="preview-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+        <div class="bg-gray-800 p-4 flex justify-between items-center">
+            <h3 class="text-lg font-semibold text-white">Template Preview</h3>
+            <button onclick="closePreviewModal()" class="text-gray-400 hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="preview-content" class="p-6 overflow-y-auto max-h-[80vh]">
+            <!-- Preview content will be loaded here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-save functionality
+let autoSaveTimer;
+let isFullscreen = false;
+
+// Auto-save draft
+function autoSave() {
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => {
+        saveAsDraft(true); // Silent save
+    }, 30000); // Save every 30 seconds
+}
+
+// Save as draft
+async function saveAsDraft(silent = false) {
+    const formData = new FormData();
+    formData.append('name', document.getElementById('name').value);
+    formData.append('description', document.getElementById('description').value);
+    formData.append('html_content', document.getElementById('html_content').value);
+    formData.append('is_draft', 'true');
+    formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    
+    try {
+        const response = await fetch(window.location.href, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok && !silent) {
+            showNotification('Draft saved successfully', 'success');
+        }
+    } catch (error) {
+        if (!silent) {
+            showNotification('Failed to save draft', 'error');
+        }
+    }
+}
+
+// Refresh preview
+function refreshPreview() {
+    const htmlContent = document.getElementById('html_content').value;
+    const cssContent = document.getElementById('css_content')?.value || '';
+    const jsContent = document.getElementById('js_content')?.value || '';
+    
+    const previewContainer = document.getElementById('template-preview');
+    
+    let fullContent = htmlContent;
+    if (cssContent) {
+        fullContent = `<style>${cssContent}</style>` + fullContent;
+    }
+    if (jsContent) {
+        fullContent += `<script>${jsContent}<\/script>`;
+    }
+    
+    previewContainer.innerHTML = fullContent;
+}
+
+// Preview template in modal
+function previewTemplate() {
+    const modal = document.getElementById('preview-modal');
+    const content = document.getElementById('preview-content');
+    
+    const htmlContent = document.getElementById('html_content').value;
+    const cssContent = document.getElementById('css_content')?.value || '';
+    const jsContent = document.getElementById('js_content')?.value || '';
+    
+    let fullContent = htmlContent;
+    if (cssContent) {
+        fullContent = `<style>${cssContent}</style>` + fullContent;
+    }
+    if (jsContent) {
+        fullContent += `<script>${jsContent}<\/script>`;
+    }
+    
+    content.innerHTML = fullContent;
+    modal.classList.remove('hidden');
+}
+
+// Close preview modal
+function closePreviewModal() {
+    document.getElementById('preview-modal').classList.add('hidden');
+}
+
+// Toggle fullscreen editor
+function toggleFullscreen() {
+    const container = document.getElementById('editor-container');
+    const textarea = document.getElementById('html_content');
+    
+    if (!isFullscreen) {
+        container.classList.add('fixed', 'inset-0', 'z-50', 'bg-gray-900');
+        textarea.style.height = '100vh';
+        isFullscreen = true;
+    } else {
+        container.classList.remove('fixed', 'inset-0', 'z-50', 'bg-gray-900');
+        textarea.style.height = 'auto';
+        textarea.rows = 20;
+        isFullscreen = false;
+    }
+}
+
+// Format code (basic indentation)
+function formatCode() {
+    const textarea = document.getElementById('html_content');
+    let content = textarea.value;
+    
+    // Basic HTML formatting
+    content = content.replace(/></g, '>\n<');
+    content = content.replace(/\n\s*\n/g, '\n');
+    
+    // Simple indentation
+    const lines = content.split('\n');
+    let indentLevel = 0;
+    const indentedLines = lines.map(line => {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('</')) {
+            indentLevel = Math.max(0, indentLevel - 1);
+        }
+        const indented = '  '.repeat(indentLevel) + trimmed;
+        if (trimmed.startsWith('<') && !trimmed.startsWith('</') && !trimmed.endsWith('/>')) {
+            indentLevel++;
+        }
+        return indented;
+    });
+    
+    textarea.value = indentedLines.join('\n');
+    refreshPreview();
+}
+
+// Load version
+async function loadVersion(versionId) {
+    try {
+        const response = await fetch(`/admin-panel/api/template-version/${versionId}/`);
+        if (response.ok) {
+            const data = await response.json();
+            document.getElementById('html_content').value = data.html_content;
+            if (data.css_content && document.getElementById('css_content')) {
+                document.getElementById('css_content').value = data.css_content;
+            }
+            if (data.js_content && document.getElementById('js_content')) {
+                document.getElementById('js_content').value = data.js_content;
+            }
+            refreshPreview();
+            showNotification('Version loaded successfully', 'success');
+        }
+    } catch (error) {
+        showNotification('Failed to load version', 'error');
+    }
+}
+
+// Restore version
+async function restoreVersion(versionId) {
+    if (confirm('Are you sure you want to restore this version? Current changes will be lost.')) {
+        await loadVersion(versionId);
+    }
+}
+
+// Duplicate template
+function duplicateTemplate() {
+    if (confirm('Create a copy of this template?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/admin-panel/templates/duplicate/{{ template.id }}/';
+        
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = 'csrfmiddlewaretoken';
+        csrfToken.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        form.appendChild(csrfToken);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg text-white ${
+        type === 'success' ? 'bg-green-600' : 
+        type === 'error' ? 'bg-red-600' : 
+        'bg-blue-600'
+    }`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Event listeners
+document.getElementById('html_content').addEventListener('input', () => {
+    refreshPreview();
+    autoSave();
+});
+
+if (document.getElementById('css_content')) {
+    document.getElementById('css_content').addEventListener('input', () => {
+        refreshPreview();
+        autoSave();
+    });
+}
+
+if (document.getElementById('js_content')) {
+    document.getElementById('js_content').addEventListener('input', () => {
+        refreshPreview();
+        autoSave();
+    });
+}
+
+// Escape key to exit fullscreen
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isFullscreen) {
+        toggleFullscreen();
+    }
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    refreshPreview();
+});
+</script>
+{% endblock %}
